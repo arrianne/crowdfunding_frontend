@@ -4,11 +4,14 @@ import "./HomePage.css";
 
 function HomePage() {
   return (
-    <div id="fundraiser-list">
-      {allFundraisers.map((fundraiserData, key) => {
-        return <FundraiserCard key={key} fundraiserData={fundraiserData} />;
-      })}
-    </div>
+    <>
+      <h1>Recent Fundraisers</h1>
+      <div id="fundraiser-list">
+        {allFundraisers.map((fundraiserData, key) => {
+          return <FundraiserCard key={key} fundraiserData={fundraiserData} />;
+        })}
+      </div>
+    </>
   );
 }
 

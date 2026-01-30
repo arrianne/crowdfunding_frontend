@@ -6,11 +6,12 @@ import HomePage from "./pages/HomePage.jsx";
 import FundraiserPage from "./pages/FundraiserPage.jsx";
 
 import NavBar from "./components/NavBar.jsx";
+import Layout from "./components/Layout.jsx";
 
-const router = createBrowserRouter([
+const myRouter = createBrowserRouter([
   {
     path: "/",
-    element: <NavBar />,
+    element: <Layout />,
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/fundraiser", element: <FundraiserPage /> },
@@ -21,6 +22,6 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     {/* Here we wrap our app in the router provider so they render */}
-    <RouterProvider router={router} />
+    <RouterProvider router={myRouter} />
   </React.StrictMode>,
 );
