@@ -6,6 +6,15 @@ function FundraiserPage() {
   const { id } = useParams();
   // useFundraiser returns three pieces of info, so we need to grab them all here
   const { fundraiser, isLoading, error } = useFundraiser(id);
+
+  if (isLoading) {
+    return <p>loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error.message}</p>;
+  }
+
   return (
     <div>
       <h2>{fundraiser.title}</h2>
