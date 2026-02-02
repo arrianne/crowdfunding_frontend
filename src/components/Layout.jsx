@@ -6,7 +6,7 @@ function Layout() {
     <div>
       <NavBar />
       <Outlet />
-      <footer>By Arrianne O'Shea</footer>
+      <footer>By Arrianne O&apos;Shea</footer>
     </div>
   );
 }

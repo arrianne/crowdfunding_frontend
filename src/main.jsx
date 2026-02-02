@@ -4,8 +4,10 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import HomePage from "./pages/HomePage.jsx";
 import FundraiserPage from "./pages/FundraiserPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import UserPage from "./pages/UserPage.jsx";
 
-import NavBar from "./components/NavBar.jsx";
 import Layout from "./components/Layout.jsx";
 
 const myRouter = createBrowserRouter([
@@ -13,15 +15,20 @@ const myRouter = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { path: "/", element: <HomePage /> },
-      { path: "/fundraiser/:id", element: <FundraiserPage /> },
+      { index: true, element: <HomePage /> }, // 👈 home route
+
+      { path: "fundraiser/:id", element: <FundraiserPage /> }, // 👈 no leading /
+
+      { path: "about", element: <AboutPage /> },
+      { path: "contact", element: <ContactPage /> },
+
+      { path: "*", element: <p>Page not found</p> },
     ],
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    {/* Here we wrap our app in the router provider so they render */}
     <RouterProvider router={myRouter} />
   </React.StrictMode>,
 );
