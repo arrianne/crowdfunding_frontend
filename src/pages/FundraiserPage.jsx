@@ -1,35 +1,207 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import useFundraiser from "../hooks/use-fundraiser";
 
 function FundraiserPage() {
-  // Here we use a hook that comes for free in react router called `useParams` to get the id from the URL so that we can pass it to our useFundraiser hook.
   const { id } = useParams();
-  // useFundraiser returns three pieces of info, so we need to grab them all here
   const { fundraiser, isLoading, error } = useFundraiser(id);
 
   if (isLoading) {
-    return <p>loading...</p>;
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="h-8 w-2/3 rounded bg-slate-200/70" />
+        <div className="mt-4 h-4 w-1/2 rounded bg-slate-200/70" />
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 h-64 rounded-2xl bg-slate-200/60" />
+          <div className="h-64 rounded-2xl bg-slate-200/60" />
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p>{error.message}</p>;
+    return (
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10">
+          <h1 className="text-xl font-extrabold text-ink">
+            Couldn’t load fundraiser
+          </h1>
+          <p className="mt-2 text-blueDeep/80">
+            Something went wrong. Try refreshing, or go back to the homepage.
+          </p>
+          <Link
+            to="/"
+            className="mt-4 inline-flex rounded-xl bg-blueBright px-5 py-3 text-sm font-semibold text-white hover:bg-blueDeep transition"
+          >
+            Back to home
+          </Link>
+        </div>
+      </div>
+    );
   }
 
+  if (!fundraiser) return null;
+
+  const title = fundraiser.title ?? "Untitled fundraiser";
+  const description =
+    fundraiser.description ??
+    "No description yet — but every boost helps. Check back for updates.";
+  const ownerName = fundraiser.owner_name ?? fundraiser.owner ?? "Neighbour";
+  const created = fundraiser.date_created
+    ? new Date(fundraiser.date_created).toLocaleDateString()
+    : null;
+
+  const isOpen = fundraiser.is_open ?? fundraiser.status ?? true;
+
+  const goal = Number(fundraiser.goal ?? 0);
+  const raised = Number(fundraiser.raised ?? 0);
+  const hasMoney = goal > 0;
+  const progress = hasMoney
+    ? Math.min(100, Math.round((raised / goal) * 100))
+    : 0;
+
   return (
-    <div>
-      <h2>{fundraiser.title}</h2>
-      <h3>Created at: {fundraiser.date_created}</h3>
-      <h3>{`Status: ${fundraiser.is_open}`}</h3>
-      <h3>Pledges:</h3>
-      <ul>
-        {fundraiser.pledges.map((pledgeData, key) => {
-          return (
-            <li key={key}>
-              {pledgeData.amount} from {pledgeData.supporter}
-            </li>
-          );
-        })}
-      </ul>
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
+      {/* PAGE HEADER (mini hero) */}
+      <section className="relative overflow-hidden bg-blueDeep">
+        <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-20 sm:pb-24">
+          {/* Mini nav / status */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/"
+              className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25 hover:bg-white/20 transition"
+            >
+              ← Back
+            </Link>
+
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25">
+              Fundraiser
+            </span>
+
+            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 ring-1 ring-white/15">
+              Closed
+            </span>
+          </div>
+
+          {/* Title */}
+          <h1 className="mt-6 max-w-3xl text-3xl font-extrabold tracking-tight text-blueSky sm:text-4xl">
+            Building paint job needed for Pleasantville
+          </h1>
+
+          {/* Meta */}
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
+            <span>Created: 4/12/2025</span>
+            <span>By Arrianne O'Shea</span>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTENT */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-6xl px-6 pt-10 pb-20">
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* LEFT: details */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Image card */}
+              <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-blueDeep/10 shadow-sm">
+                <div className="relative h-64 bg-blueSky/20 sm:h-80">
+                  <img
+                    src={fundraiser.image}
+                    alt={title}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/placeholder.png";
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* About card */}
+              <div className="rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
+                <h2 className="text-lg font-extrabold text-ink">
+                  What this fundraiser is for
+                </h2>
+                <p className="mt-3 leading-relaxed text-blueDeep/80">
+                  {description}
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center rounded-full bg-blueBright/10 px-3 py-1 text-xs font-semibold text-blueDeep">
+                    Community-first
+                  </span>
+                  <span className="inline-flex items-center rounded-full bg-blueBright/10 px-3 py-1 text-xs font-semibold text-blueDeep">
+                    Transparent updates
+                  </span>
+                  <span className="inline-flex items-center rounded-full bg-blueBright/10 px-3 py-1 text-xs font-semibold text-blueDeep">
+                    Neighbour powered
+                  </span>
+                </div>
+              </div>
+
+              {/* Updates placeholder */}
+              <div className="rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
+                <h2 className="text-lg font-extrabold text-ink">Updates</h2>
+                <p className="mt-2 text-sm text-blueDeep/70">
+                  Updates from the organiser will show up here.
+                </p>
+              </div>
+            </div>
+
+            {/* RIGHT: contribution card */}
+            <aside className="lg:col-span-1">
+              <div className="sticky top-6 rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
+                <h2 className="text-lg font-extrabold text-ink">Chip in</h2>
+
+                {hasMoney ? (
+                  <>
+                    <div className="mt-4">
+                      <div className="flex items-end justify-between">
+                        <p className="text-sm font-semibold text-blueDeep/80">
+                          Raised
+                        </p>
+                        <p className="text-sm font-semibold text-blueDeep/70">
+                          {progress}%
+                        </p>
+                      </div>
+
+                      <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-blueBright/10">
+                        <div
+                          className="h-full rounded-full bg-blueBright"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+
+                      <div className="mt-3 flex justify-between text-sm text-blueDeep/80">
+                        <span>${raised.toLocaleString()}</span>
+                        <span>${goal.toLocaleString()} goal</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-3 text-sm text-blueDeep/70">
+                    This fundraiser accepts support — details coming soon.
+                  </p>
+                )}
+
+                <button
+                  className="mt-6 w-full rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
+                  disabled={!isOpen}
+                >
+                  {isOpen ? "Contribute" : "Fundraiser closed"}
+                </button>
+
+                <button className="mt-3 w-full rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition">
+                  Share
+                </button>
+
+                <p className="mt-4 text-xs text-blueDeep/60">
+                  Neighbour-powered support — money or skills — all welcome.
+                </p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
