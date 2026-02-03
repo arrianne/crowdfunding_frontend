@@ -7,6 +7,7 @@ import "./index.css";
 
 import HomePage from "./pages/HomePage.jsx";
 import FundraiserPage from "./pages/FundraiserPage.jsx";
+import BuildingPage from "./pages/BuildingPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -27,6 +28,7 @@ const myRouter = createBrowserRouter([
       { path: "/signup", element: <SignupPage /> },
 
       { path: "fundraiser/:id", element: <FundraiserPage /> },
+      { path: "/buildings/:id", element: <BuildingPage /> },
 
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },

@@ -1,9 +1,15 @@
 import useFundraisers from "../hooks/use-fundraisers";
+import useBuildings from "../hooks/use-buildings";
+
 import FundraiserCard from "../components/FundraiserCard";
 
 function HomePage() {
   const { fundraisers } = useFundraisers();
+  const { buildings } = useBuildings();
 
+  const buildingsById = Object.fromEntries(buildings.map((b) => [b.id, b]));
+
+  console.log("Buildings:", buildings);
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       {/* HERO */}
@@ -84,12 +90,17 @@ function HomePage() {
           </div>
 
           <div className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {fundraisers.map((fundraiserData) => (
-              <FundraiserCard
-                key={fundraiserData.id}
-                fundraiserData={fundraiserData}
-              />
-            ))}
+            {fundraisers.map((fundraiserData) => {
+              const building = buildingsById[fundraiserData.building];
+
+              return (
+                <FundraiserCard
+                  key={fundraiserData.id}
+                  fundraiserData={fundraiserData}
+                  building={building} // ✅ pass the matched building object
+                />
+              );
+            })}
           </div>
         </div>
       </section>

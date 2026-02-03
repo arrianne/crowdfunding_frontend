@@ -1,56 +1,52 @@
 import { Link } from "react-router-dom";
 
-function FundraiserCard({ fundraiserData }) {
+function FundraiserCard({ fundraiserData, building }) {
   const fundraiserLink = `/fundraiser/${fundraiserData.id}`;
+  const buildingLink = `/buildings/${fundraiserData.building}`;
 
   return (
-    <Link
-      to={fundraiserLink}
-      className="group block overflow-hidden rounded-2xl bg-white ring-1 ring-blueDeep/10 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:ring-blueBright/25"
-    >
-      {/* Image */}
-      <div className="relative h-44 overflow-hidden bg-blueSky/30">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <Link to={fundraiserLink} className="block">
         <img
           src={fundraiserData.image}
           alt={fundraiserData.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-44 w-full rounded-xl object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = "/images/placeholder.png";
           }}
         />
-
-        {/* Soft colour wash to match your palette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-blueSky/40 via-transparent to-transparent" />
-
-        {/* Little corner badge */}
-        <div className="absolute left-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-blueDeep ring-1 ring-blueDeep/10 backdrop-blur">
-          Community
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-5">
-        <h3 className="text-base font-extrabold leading-snug text-ink line-clamp-2">
+        <h3 className="mt-4 text-lg font-extrabold tracking-tight text-ink">
           {fundraiserData.title}
         </h3>
-
-        <p className="mt-2 text-sm text-blueDeep/80 line-clamp-2">
-          A small chip-in can make a big difference.
+        <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+          {fundraiserData.description}
         </p>
+      </Link>
 
-        {/* Footer */}
-        <div className="mt-4 flex items-center justify-between">
-          <span className="inline-flex items-center rounded-full bg-blueBright/10 px-3 py-1 text-xs font-semibold text-blueDeep">
-            View details
-          </span>
+      {/* ✅ Building link */}
+      <div className="mt-4 flex items-center justify-between">
+        <Link
+          to={buildingLink}
+          className="text-sm font-semibold text-blueDeep/80 hover:text-blueDeep transition"
+        >
+          {building?.name
+            ? `Building: ${building.name}`
+            : `Building #${fundraiserData.building}`}{" "}
+          →
+        </Link>
 
-          <span className="text-sm font-bold text-pinky group-hover:underline">
-            Chip in →
-          </span>
-        </div>
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+            fundraiserData.is_open
+              ? "bg-green-100 text-green-700"
+              : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {fundraiserData.is_open ? "Open" : "Closed"}
+        </span>
       </div>
-    </Link>
+    </div>
   );
 }
 
