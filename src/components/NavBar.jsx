@@ -1,5 +1,5 @@
 import { NavLink, Link } from "react-router-dom";
-import { useAuth } from "../hooks/use-auth";
+import { useAuth } from "../hooks/use-auth"; // ✅ named import
 
 const linkBase =
   "text-sm font-semibold tracking-wide text-white/80 hover:text-white transition";
@@ -75,15 +75,20 @@ function NavBar() {
               className="hidden sm:inline text-sm font-semibold text-white/80 hover:text-white transition"
               onClick={handleLogout}
             >
-              Log Out
+              Log out
             </Link>
           ) : (
-            <Link
-              to="/login"
-              className="text-sm font-semibold text-white/80 hover:text-white transition"
-            >
-              Login
-            </Link>
+            <div className="hidden sm:flex items-center gap-1 text-sm font-semibold text-white/80">
+              <Link to="/login" className="hover:text-white transition">
+                Log in
+              </Link>
+
+              <span className="opacity-60">/</span>
+
+              <Link to="/signup" className="hover:text-white transition">
+                Sign up
+              </Link>
+            </div>
           )}
 
           <Link
