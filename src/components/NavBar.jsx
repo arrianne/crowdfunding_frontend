@@ -1,4 +1,5 @@
 import { NavLink, Link } from "react-router-dom";
+import { useAuth } from "../hooks/use-auth";
 
 const linkBase =
   "text-sm font-semibold tracking-wide text-white/80 hover:text-white transition";
@@ -6,6 +7,15 @@ const linkBase =
 const linkActive = "text-white";
 
 function NavBar() {
+  const { auth, setAuth } = useAuth();
+
+  const handleLogout = () => {
+    window.localStorage.removeItem("token");
+    setAuth({ token: null });
+  };
+
+  const isLoggedIn = Boolean(auth?.token);
+
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -28,6 +38,7 @@ function NavBar() {
           >
             Home
           </NavLink>
+
           <NavLink
             to="/about"
             className={({ isActive }) =>
@@ -36,6 +47,7 @@ function NavBar() {
           >
             About
           </NavLink>
+
           <NavLink
             to="/contact"
             className={({ isActive }) =>
@@ -44,6 +56,7 @@ function NavBar() {
           >
             Contact
           </NavLink>
+
           <NavLink
             to="/user"
             className={({ isActive }) =>
@@ -56,12 +69,22 @@ function NavBar() {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <Link
-            to="/user"
-            className="hidden sm:inline text-sm font-semibold text-white/80 hover:text-white transition"
-          >
-            Sign in
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              to="/"
+              className="hidden sm:inline text-sm font-semibold text-white/80 hover:text-white transition"
+              onClick={handleLogout}
+            >
+              Log Out
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="text-sm font-semibold text-white/80 hover:text-white transition"
+            >
+              Login
+            </Link>
+          )}
 
           <Link
             to="/user"
