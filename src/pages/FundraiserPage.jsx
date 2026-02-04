@@ -1,9 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import useFundraiser from "../hooks/use-fundraiser";
+import useBuilding from "../hooks/use-building";
 
 function FundraiserPage() {
   const { id } = useParams();
   const { fundraiser, isLoading, error } = useFundraiser(id);
+
+  const buildingId = fundraiser?.building;
+  const { building } = useBuilding(buildingId);
+  const buildingName = building?.name ?? "Building";
 
   if (isLoading) {
     return (
@@ -84,13 +89,23 @@ function FundraiserPage() {
 
           {/* Title */}
           <h1 className="mt-6 max-w-3xl text-3xl font-extrabold tracking-tight text-blueSky sm:text-4xl">
-            Building paint job needed for Pleasantville
+            {title}
           </h1>
 
+          {/* Building context */}
+          <Link
+            to={`/buildings/${buildingId}`}
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-sm font-semibold text-white ring-1 ring-white/25 hover:bg-white/30 transition"
+          >
+            <span className="opacity-80">Building:</span>
+            <span className="font-extrabold">{buildingName}</span>
+            <span aria-hidden>→</span>
+          </Link>
+
           {/* Meta */}
-          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
-            <span>Created: 4/12/2025</span>
-            <span>By Arrianne O'Shea</span>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
+            {created && <span>Created: {created}</span>}
+            <span>By {ownerName}</span>
           </div>
         </div>
       </section>
