@@ -1,5 +1,6 @@
 import useFundraisers from "../hooks/use-fundraisers";
 import useBuildings from "../hooks/use-buildings";
+import { Link } from "react-router-dom";
 
 import FundraiserCard from "../components/FundraiserCard";
 
@@ -35,13 +36,19 @@ function HomePage() {
 
             {/* CTAs */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button className="rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition">
+              <Link
+                to="/fundraisers/new"
+                className="rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition"
+              >
                 Start a fundraiser
-              </button>
+              </Link>
 
-              <button className="rounded-xl bg-white/20 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition">
+              <Link
+                to="/fundraisers"
+                className="rounded-xl bg-white/20 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
+              >
                 Browse fundraisers
-              </button>
+              </Link>
             </div>
           </div>
         </div>
