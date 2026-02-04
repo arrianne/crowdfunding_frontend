@@ -6,6 +6,9 @@ export default function useBuilding(buildingId) {
   const [isLoadingBuilding, setIsLoadingBuilding] = useState(true);
   const [buildingError, setBuildingError] = useState(null);
 
+  const { buildings, isLoadingBuildings } = useBuildings();
+  const [selectedBuildingId, setSelectedBuildingId] = useState("");
+
   useEffect(() => {
     if (!buildingId) return;
 
