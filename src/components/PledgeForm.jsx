@@ -8,46 +8,77 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
   const token = auth?.token || localStorage.getItem("token");
   const isLoggedIn = !!token;
 
+  // --- Form state ---
+  const [pledgeType, setPledgeType] = useState("MONEY"); // "MONEY" | "SKILL"
+
   const [amount, setAmount] = useState("");
+  const [skillDescription, setSkillDescription] = useState("");
+  const [hours, setHours] = useState("");
+
   const [comment, setComment] = useState("");
   const [anonymous, setAnonymous] = useState(false);
 
+  // --- UX state ---
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef(false);
 
-  const canSubmit = isLoggedIn && isOpen && Number(amount) > 0 && !submitting;
+  const canSubmit = (() => {
+    if (!isLoggedIn || !isOpen || submitting) return false;
+
+    if (pledgeType === "MONEY") {
+      return Number(amount) > 0;
+    }
+
+    // SKILL
+    return skillDescription.trim().length > 0; // hours optional
+  })();
+
+  const resetForm = () => {
+    setPledgeType("MONEY");
+    setAmount("");
+    setSkillDescription("");
+    setHours("");
+    setComment("");
+    setAnonymous(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (inFlight.current) return; // ✅ prevents double submit
+    // Prevent double submits
+    if (inFlight.current) return;
     inFlight.current = true;
 
     setSubmitting(true);
     setError("");
 
     try {
-      const created = await postPledge(
-        {
-          fundraiser: fundraiserId,
-          pledge_type: "MONEY",
-          amount: Number(amount),
-          skill_description: "",
-          hours: null,
-          comment,
-          anonymous,
-        },
-        token,
-      );
+      const payload =
+        pledgeType === "MONEY"
+          ? {
+              fundraiser: fundraiserId,
+              pledge_type: "MONEY",
+              amount: Number(amount),
+              skill_description: "",
+              hours: null,
+              comment,
+              anonymous,
+            }
+          : {
+              fundraiser: fundraiserId,
+              pledge_type: "SKILL",
+              amount: null,
+              skill_description: skillDescription.trim(),
+              hours: hours === "" ? null : Number(hours),
+              comment,
+              anonymous,
+            };
 
+      const created = await postPledge(payload, token);
+
+      resetForm();
       onSuccess?.(created);
-
-      setAmount("");
-      setComment("");
-      setAnonymous(false);
-
-      onSuccess?.();
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to submit pledge");
@@ -76,35 +107,99 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
       )}
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+        {/* Pledge type */}
         <label className="block">
           <span className="text-xs font-semibold text-blueDeep/70">
-            Amount (AUD)
+            I want to pledge
           </span>
-          <input
-            type="number"
-            min="1"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blueBright/40"
-            required
+          <select
+            value={pledgeType}
+            onChange={(e) => {
+              const next = e.target.value;
+              setPledgeType(next);
+
+              // Optional: clear fields when switching types
+              setAmount("");
+              setSkillDescription("");
+              setHours("");
+            }}
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blueBright/40"
             disabled={!isLoggedIn || !isOpen}
-          />
+          >
+            <option value="MONEY">Money</option>
+            <option value="SKILL">Time / Skills</option>
+          </select>
         </label>
 
+        {/* MONEY fields */}
+        {pledgeType === "MONEY" && (
+          <label className="block">
+            <span className="text-xs font-semibold text-blueDeep/70">
+              Amount (AUD)
+            </span>
+            <input
+              type="number"
+              min="1"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blueBright/40"
+              required
+              disabled={!isLoggedIn || !isOpen}
+            />
+          </label>
+        )}
+
+        {/* SKILL fields */}
+        {pledgeType === "SKILL" && (
+          <>
+            <label className="block">
+              <span className="text-xs font-semibold text-blueDeep/70">
+                What can you help with?
+              </span>
+              <input
+                value={skillDescription}
+                onChange={(e) => setSkillDescription(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blueBright/40"
+                placeholder="e.g. Gardening, painting, minor repairs, admin help…"
+                required
+                disabled={!isLoggedIn || !isOpen}
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-xs font-semibold text-blueDeep/70">
+                Hours available (optional)
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blueBright/40"
+                placeholder="e.g. 2"
+                disabled={!isLoggedIn || !isOpen}
+              />
+            </label>
+          </>
+        )}
+
+        {/* Comment */}
         <label className="block">
           <span className="text-xs font-semibold text-blueDeep/70">
-            Message (optional)
+            Comment (optional)
           </span>
           <textarea
             rows={3}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blueBright/40"
-            placeholder="Happy to support!"
+            placeholder="Anything the organiser should know?"
             disabled={!isLoggedIn || !isOpen}
           />
         </label>
 
+        {/* Anonymous */}
         <label className="flex items-center gap-2 text-xs text-blueDeep/70">
           <input
             type="checkbox"
@@ -115,6 +210,7 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
           Make this pledge anonymous
         </label>
 
+        {/* Actions */}
         <div className="flex gap-2 pt-2">
           <button
             type="submit"
