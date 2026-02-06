@@ -201,11 +201,11 @@ function FundraiserPage() {
       ====================================================== */}
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-20">
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
             {/* ======================================================
-                LEFT COLUMN
-            ====================================================== */}
-            <div className="lg:col-span-2 space-y-6">
+      LEFT COLUMN
+  ====================================================== */}
+            <div className="space-y-6">
               {/* Image card */}
               <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-blueDeep/10 shadow-sm">
                 <div className="relative h-64 bg-blueSky/20 sm:h-80">
@@ -243,88 +243,83 @@ function FundraiserPage() {
                 </div>
               </div>
 
-              {/* Updates placeholder */}
+              {/* Pledges */}
               <PledgesList pledges={fundraiser.pledges} />
             </div>
-          </div>
 
-          {/* ======================================================
-                RIGHT COLUMN / CHIP IN
-            ====================================================== */}
-          <aside className="lg:col-span-1">
-            <div className="sticky top-6 rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
-              <h2 className="text-lg font-extrabold text-ink">Chip in</h2>
+            {/* ======================================================
+      RIGHT COLUMN / CHIP IN
+  ====================================================== */}
+            <aside>
+              <div className="sticky top-6 rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
+                <h2 className="text-lg font-extrabold text-ink">Chip in</h2>
 
-              {/* Success banner (no alerts; reliable timing) */}
-              {pledgeSuccess && (
-                <div className="mt-3 rounded-xl bg-blueBright/10 p-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/10">
-                  Pledge submitted! 🎉
-                </div>
-              )}
-
-              {/* Contribute button */}
-              <button
-                className="mt-6 w-full rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
-                disabled={!isOpen}
-                onClick={() => setShowPledgeForm(true)}
-              >
-                {isOpen ? "Contribute" : "Fundraiser closed"}
-              </button>
-
-              {/* Pledge form */}
-              {showPledgeForm && (
-                <PledgeForm
-                  fundraiserId={fundraiser.id}
-                  isOpen={isOpen}
-                  onCancel={() => setShowPledgeForm(false)}
-                  onSuccess={() => {
-                    setShowPledgeForm(false);
-                    setRefreshKey((k) => k + 1); // ✅ refetch fundraiser totals
-                    setPledgeSuccess(true); // ✅ show banner (timer handled by useEffect)
-                  }}
-                />
-              )}
-
-              {/* Progress */}
-              {hasMoney ? (
-                <div className="mt-4">
-                  <div className="flex items-end justify-between">
-                    <p className="text-sm font-semibold text-blueDeep/80">
-                      Raised
-                    </p>
-                    <p className="text-sm font-semibold text-blueDeep/70">
-                      {progress}%
-                    </p>
+                {pledgeSuccess && (
+                  <div className="mt-3 rounded-xl bg-blueBright/10 p-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/10">
+                    Pledge submitted! 🎉
                   </div>
+                )}
 
-                  <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-blueBright/10">
-                    <div
-                      className="h-full rounded-full bg-blueBright"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
+                <button
+                  className="mt-6 w-full rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
+                  disabled={!isOpen}
+                  onClick={() => setShowPledgeForm(true)}
+                >
+                  {isOpen ? "Contribute" : "Fundraiser closed"}
+                </button>
 
-                  <div className="mt-3 flex justify-between text-sm text-blueDeep/80">
-                    <span>${raised.toLocaleString()}</span>
-                    <span>${goal.toLocaleString()} goal</span>
+                {showPledgeForm && (
+                  <PledgeForm
+                    fundraiserId={fundraiser.id}
+                    isOpen={isOpen}
+                    onCancel={() => setShowPledgeForm(false)}
+                    onSuccess={() => {
+                      setShowPledgeForm(false);
+                      setRefreshKey((k) => k + 1);
+                      setPledgeSuccess(true);
+                    }}
+                  />
+                )}
+
+                {hasMoney ? (
+                  <div className="mt-4">
+                    <div className="flex items-end justify-between">
+                      <p className="text-sm font-semibold text-blueDeep/80">
+                        Raised
+                      </p>
+                      <p className="text-sm font-semibold text-blueDeep/70">
+                        {progress}%
+                      </p>
+                    </div>
+
+                    <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-blueBright/10">
+                      <div
+                        className="h-full rounded-full bg-blueBright"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+
+                    <div className="mt-3 flex justify-between text-sm text-blueDeep/80">
+                      <span>${raised.toLocaleString()}</span>
+                      <span>${goal.toLocaleString()} goal</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <p className="mt-3 text-sm text-blueDeep/70">
-                  This fundraiser accepts support — details coming soon.
+                ) : (
+                  <p className="mt-3 text-sm text-blueDeep/70">
+                    This fundraiser accepts support — details coming soon.
+                  </p>
+                )}
+
+                <button className="mt-6 w-full rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition">
+                  Share
+                </button>
+
+                <p className="mt-4 text-xs text-blueDeep/60">
+                  Neighbour-powered support — money or skills — all welcome.
                 </p>
-              )}
-
-              {/* Share */}
-              <button className="mt-6 w-full rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition">
-                Share
-              </button>
-
-              <p className="mt-4 text-xs text-blueDeep/60">
-                Neighbour-powered support — money or skills — all welcome.
-              </p>
-            </div>
-          </aside>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
     </div>
