@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
 import useFundraiser from "../hooks/use-fundraiser";
 import useBuilding from "../hooks/use-building";
+import { deleteFundraiser } from "../api/delete-fundraiser";
 
 function FundraiserPage() {
   const { id } = useParams();
@@ -9,6 +10,9 @@ function FundraiserPage() {
   const { auth } = useAuth();
 
   const { fundraiser, isLoading, error } = useFundraiser(id);
+
+  console.log("AUTH user id:", auth?.user?.id);
+  console.log("FUNDRAISER owner:", fundraiser?.owner);
 
   const buildingId = fundraiser?.building;
   const { building } = useBuilding(buildingId);
@@ -54,29 +58,22 @@ function FundraiserPage() {
   const isOwner = auth?.user?.id === fundraiser.owner?.id;
 
   const handleDeleteFundraiser = async () => {
-    if (!confirm("Are you sure you want to delete this fundraiser?")) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this fundraiser?\n\n" +
+        "• This will permanently delete the fundraiser\n" +
+        "• This action cannot be undone",
+    );
+    if (!confirmed) return;
 
     try {
       const token = auth?.token || localStorage.getItem("token");
+      await deleteFundraiser(fundraiser.id, token);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/fundraisers/${fundraiser.id}/`,
-        {
-          method: "DELETE",
-          headers: {
-            ...(token && { Authorization: `Token ${token}` }),
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete fundraiser");
-      }
-
-      navigate("/");
+      // nicest redirect: back to the building page
+      navigate(`/buildings/${fundraiser.building}`);
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      alert(err.message || "Something went wrong while deleting.");
     }
   };
 

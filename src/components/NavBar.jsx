@@ -49,6 +49,15 @@ function NavBar() {
           </NavLink>
 
           <NavLink
+            to="/strata-communities"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? linkActive : ""}`
+            }
+          >
+            Strata Communities
+          </NavLink>
+
+          <NavLink
             to="/contact"
             className={({ isActive }) =>
               `${linkBase} ${isActive ? linkActive : ""}`
