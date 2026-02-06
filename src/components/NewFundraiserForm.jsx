@@ -2,6 +2,7 @@ import { useState } from "react";
 import useBuildings from "../hooks/use-buildings";
 import { useAuth } from "../hooks/use-auth";
 import { useNavigate } from "react-router-dom";
+import NewBuildingForm from "./NewBuildingForm";
 
 function NewFundraiserForm() {
   const { auth } = useAuth(); // ✅ now auth exists if you need it
@@ -10,7 +11,17 @@ function NewFundraiserForm() {
   const navigate = useNavigate();
 
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
-  //   const [isAddingNewBuilding, setIsAddingNewBuilding] = useState(false);
+
+  const isNewBuilding = selectedBuildingId === "__new__";
+
+  const [newBuilding, setNewBuilding] = useState({
+    name: "",
+    cts_number: "",
+    street: "",
+    suburb: "",
+    state: "",
+    postcode: "",
+  });
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -23,60 +34,100 @@ function NewFundraiserForm() {
     title.trim() &&
     description.trim() &&
     Number(goal) > 0 &&
-    selectedBuildingId;
+    (selectedBuildingId && selectedBuildingId !== "__new__"
+      ? true
+      : newBuilding.name.trim() &&
+        newBuilding.cts_number.trim() &&
+        newBuilding.street.trim());
+
+  // handle submit
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const token = auth?.token || localStorage.getItem("token");
 
-    const url = `${import.meta.env.VITE_API_URL}/fundraisers/`;
-
-    const fundraiserData = {
-      title: title.trim(),
-      description: description.trim(),
-      goal: Number(goal),
-      building: Number(selectedBuildingId),
-      ...(image.trim() && { image: image.trim() }),
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Token ${token}` }),
     };
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Token ${token}` }),
+      let buildingId;
+
+      if (selectedBuildingId === "__new__") {
+        const address = [
+          newBuilding.street.trim(),
+          [
+            newBuilding.suburb.trim(),
+            newBuilding.state.trim(),
+            newBuilding.postcode.trim(),
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+        const buildingRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/buildings/`,
+          {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              name: newBuilding.name.trim(),
+              cts_number: newBuilding.cts_number.trim(),
+              address,
+            }),
+          },
+        );
+
+        const buildingData = await buildingRes.json().catch(() => null);
+
+        if (!buildingRes.ok) {
+          const message =
+            buildingData?.detail ||
+            (buildingData && JSON.stringify(buildingData)) ||
+            `Building create failed (${buildingRes.status})`;
+          throw new Error(message);
+        }
+
+        buildingId = buildingData.id;
+      } else {
+        buildingId = Number(selectedBuildingId);
+      }
+
+      const fundraiserPayload = {
+        title: title.trim(),
+        description: description.trim(),
+        goal: Number(goal),
+        building: buildingId,
+        ...(image.trim() && { image: image.trim() }),
+      };
+
+      const fundraiserRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/fundraisers/`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(fundraiserPayload),
         },
-        body: JSON.stringify(fundraiserData),
-      });
+      );
 
-      const data = await response.json().catch(() => null);
+      const fundraiserData = await fundraiserRes.json().catch(() => null);
 
-      if (!response.ok) {
+      if (!fundraiserRes.ok) {
         const message =
-          data?.detail ||
-          (data && JSON.stringify(data)) ||
-          `Request failed (${response.status})`;
+          fundraiserData?.detail ||
+          (fundraiserData && JSON.stringify(fundraiserData)) ||
+          `Fundraiser create failed (${fundraiserRes.status})`;
         throw new Error(message);
       }
 
-      // ✅ success
-      navigate(`/fundraiser/${data.id}`);
-
-      console.log("✅ Fundraiser created:", data);
-
-      // reset form
-      setTitle("");
-      setDescription("");
-      setGoal("");
-      setImage("");
-      setSelectedBuildingId("");
-
-      // optional redirect
-      // navigate(`/fundraiser/${data.id}`);
+      navigate(`/fundraiser/${fundraiserData.id}`);
     } catch (err) {
-      console.error("❌ Create fundraiser failed:", err);
-      alert(`Couldn’t create fundraiser: ${err.message}`);
+      console.error(err);
+      alert(err.message);
     }
   };
 
@@ -168,10 +219,10 @@ function NewFundraiserForm() {
           ) : (
             <div className="relative mt-2">
               <select
-                value={selectedBuildingId}
+                value={isNewBuilding ? "" : selectedBuildingId}
+                disabled={isNewBuilding}
                 onChange={(e) => {
                   setSelectedBuildingId(e.target.value);
-                  setIsAddingNewBuilding(false);
                 }}
                 className="w-full appearance-none rounded-xl border border-blueDeep/20 bg-white px-4 py-3 pr-10 text-sm font-semibold text-ink shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
               >
@@ -183,6 +234,32 @@ function NewFundraiserForm() {
                   </option>
                 ))}
               </select>
+
+              <button
+                type="button"
+                onClick={() => setSelectedBuildingId("__new__")}
+                className="mt-3 text-sm font-semibold text-blueDeep hover:underline"
+              >
+                + Add a new building
+              </button>
+
+              {isNewBuilding && (
+                <NewBuildingForm
+                  value={newBuilding}
+                  onChange={setNewBuilding}
+                  onCancel={() => {
+                    setSelectedBuildingId("");
+                    setNewBuilding({
+                      name: "",
+                      cts_number: "",
+                      street: "",
+                      suburb: "",
+                      state: "",
+                      postcode: "",
+                    });
+                  }}
+                />
+              )}
 
               <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                 <svg
@@ -199,17 +276,6 @@ function NewFundraiserForm() {
               </div>
             </div>
           )}
-
-          {/* <button
-            type="button"
-            onClick={() => {
-              setIsAddingNewBuilding(true);
-              setSelectedBuildingId("");
-            }}
-            className="mt-3 text-sm font-semibold text-blueDeep hover:underline"
-          >
-            My building isn’t listed
-          </button> */}
         </div>
 
         <div className="pt-2">
