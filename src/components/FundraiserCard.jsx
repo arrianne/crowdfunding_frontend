@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 function FundraiserCard({ fundraiserData, building }) {
-  const fundraiserLink = `/fundraiser/${fundraiserData.id}`;
+  const fundraiserLink = `/fundraisers/${fundraiserData.id}`;
   const buildingLink = `/buildings/${fundraiserData.building}`;
 
   return (

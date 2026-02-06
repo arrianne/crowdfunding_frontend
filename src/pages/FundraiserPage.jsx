@@ -1,15 +1,20 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/use-auth";
 import useFundraiser from "../hooks/use-fundraiser";
 import useBuilding from "../hooks/use-building";
 
 function FundraiserPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { auth } = useAuth();
+
   const { fundraiser, isLoading, error } = useFundraiser(id);
 
   const buildingId = fundraiser?.building;
   const { building } = useBuilding(buildingId);
   const buildingName = building?.name ?? "Building";
 
+  // ✅ guards FIRST (prevents blank page crashes)
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-16">
@@ -46,6 +51,36 @@ function FundraiserPage() {
 
   if (!fundraiser) return null;
 
+  const isOwner = auth?.user?.id === fundraiser.owner?.id;
+
+  const handleDeleteFundraiser = async () => {
+    if (!confirm("Are you sure you want to delete this fundraiser?")) return;
+
+    try {
+      const token = auth?.token || localStorage.getItem("token");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/fundraisers/${fundraiser.id}/`,
+        {
+          method: "DELETE",
+          headers: {
+            ...(token && { Authorization: `Token ${token}` }),
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete fundraiser");
+      }
+
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
+  // Derived display values
   const title = fundraiser.title ?? "Untitled fundraiser";
   const description =
     fundraiser.description ??
@@ -55,10 +90,10 @@ function FundraiserPage() {
     ? new Date(fundraiser.date_created).toLocaleDateString()
     : null;
 
-  const isOpen = fundraiser.is_open ?? fundraiser.status ?? true;
+  const isOpen = fundraiser.is_open ?? true;
 
   const goal = Number(fundraiser.goal ?? 0);
-  const raised = Number(fundraiser.raised ?? 0);
+  const raised = Number(fundraiser.total_pledged ?? fundraiser.raised ?? 0);
   const hasMoney = goal > 0;
   const progress = hasMoney
     ? Math.min(100, Math.round((raised / goal) * 100))
@@ -83,7 +118,7 @@ function FundraiserPage() {
             </span>
 
             <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 ring-1 ring-white/15">
-              Closed
+              {isOpen ? "Open" : "Closed"}
             </span>
           </div>
 
@@ -93,20 +128,45 @@ function FundraiserPage() {
           </h1>
 
           {/* Building context */}
-          <Link
-            to={`/buildings/${buildingId}`}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-sm font-semibold text-white ring-1 ring-white/25 hover:bg-white/30 transition"
-          >
-            <span className="opacity-80">Building:</span>
-            <span className="font-extrabold">{buildingName}</span>
-            <span aria-hidden>→</span>
-          </Link>
+          {buildingId ? (
+            <Link
+              to={`/buildings/${buildingId}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-sm font-semibold text-white ring-1 ring-white/25 hover:bg-white/30 transition"
+            >
+              <span className="opacity-80">Building:</span>
+              <span className="font-extrabold">{buildingName}</span>
+              <span aria-hidden>→</span>
+            </Link>
+          ) : (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-white/80 ring-1 ring-white/15">
+              Building: {buildingName}
+            </div>
+          )}
 
           {/* Meta */}
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
             {created && <span>Created: {created}</span>}
             <span>By {ownerName}</span>
           </div>
+
+          {/* Owner actions */}
+          {isOwner && (
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                to={`/fundraisers/${fundraiser.id}/edit`}
+                className="inline-flex items-center rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
+              >
+                Edit
+              </Link>
+
+              <button
+                onClick={handleDeleteFundraiser}
+                className="inline-flex items-center rounded-full bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 ring-1 ring-red-300/30 hover:bg-red-500/30 transition"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -114,7 +174,7 @@ function FundraiserPage() {
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-20">
           <div className="grid gap-8 lg:grid-cols-3">
-            {/* LEFT: details */}
+            {/* LEFT */}
             <div className="lg:col-span-2 space-y-6">
               {/* Image card */}
               <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-blueDeep/10 shadow-sm">
@@ -162,36 +222,34 @@ function FundraiserPage() {
               </div>
             </div>
 
-            {/* RIGHT: contribution card */}
+            {/* RIGHT */}
             <aside className="lg:col-span-1">
               <div className="sticky top-6 rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
                 <h2 className="text-lg font-extrabold text-ink">Chip in</h2>
 
                 {hasMoney ? (
-                  <>
-                    <div className="mt-4">
-                      <div className="flex items-end justify-between">
-                        <p className="text-sm font-semibold text-blueDeep/80">
-                          Raised
-                        </p>
-                        <p className="text-sm font-semibold text-blueDeep/70">
-                          {progress}%
-                        </p>
-                      </div>
-
-                      <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-blueBright/10">
-                        <div
-                          className="h-full rounded-full bg-blueBright"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-
-                      <div className="mt-3 flex justify-between text-sm text-blueDeep/80">
-                        <span>${raised.toLocaleString()}</span>
-                        <span>${goal.toLocaleString()} goal</span>
-                      </div>
+                  <div className="mt-4">
+                    <div className="flex items-end justify-between">
+                      <p className="text-sm font-semibold text-blueDeep/80">
+                        Raised
+                      </p>
+                      <p className="text-sm font-semibold text-blueDeep/70">
+                        {progress}%
+                      </p>
                     </div>
-                  </>
+
+                    <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-blueBright/10">
+                      <div
+                        className="h-full rounded-full bg-blueBright"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+
+                    <div className="mt-3 flex justify-between text-sm text-blueDeep/80">
+                      <span>${raised.toLocaleString()}</span>
+                      <span>${goal.toLocaleString()} goal</span>
+                    </div>
+                  </div>
                 ) : (
                   <p className="mt-3 text-sm text-blueDeep/70">
                     This fundraiser accepts support — details coming soon.

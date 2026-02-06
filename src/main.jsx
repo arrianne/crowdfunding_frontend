@@ -14,6 +14,7 @@ import ContactPage from "./pages/ContactPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import UserPage from "./pages/UserPage.jsx";
+import EditBuildingPage from "./pages/EditBuildingPage.jsx";
 
 import Layout from "./components/Layout.jsx";
 
@@ -24,13 +25,15 @@ const myRouter = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { index: true, element: <HomePage /> }, // 👈 home route
-      { path: "/login", element: <LoginPage /> },
-      { path: "/signup", element: <SignupPage /> },
+      { index: true, element: <HomePage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "signup", element: <SignupPage /> },
 
-      { path: "fundraiser/:id", element: <FundraiserPage /> },
-      { path: "/fundraisers/new", element: <NewFundraiserPage /> },
-      { path: "/buildings/:id", element: <BuildingPage /> },
+      { path: "fundraisers/new", element: <NewFundraiserPage /> },
+      { path: "fundraisers/:id", element: <FundraiserPage /> },
+
+      { path: "buildings/:id", element: <BuildingPage /> },
+      { path: "buildings/:id/edit", element: <EditBuildingPage /> },
 
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
