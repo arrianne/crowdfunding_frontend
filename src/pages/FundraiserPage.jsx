@@ -1,33 +1,52 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+
 import { useAuth } from "../hooks/use-auth";
 import useFundraiser from "../hooks/use-fundraiser";
 import useBuilding from "../hooks/use-building";
+
 import { deleteFundraiser } from "../api/delete-fundraiser";
+import PledgeForm from "../components/PledgeForm";
 
 function FundraiserPage() {
+  // ======================================================
+  // ROUTING + AUTH
+  // ======================================================
   const { id } = useParams();
   const navigate = useNavigate();
   const { auth } = useAuth();
 
-  const { fundraiser, isLoading, error } = useFundraiser(id);
+  // ======================================================
+  // LOCAL UI STATE
+  // ======================================================
+  const [refreshKey, setRefreshKey] = useState(0); // triggers refetch after pledge
+  const [showPledgeForm, setShowPledgeForm] = useState(false);
+  const [pledgeSuccess, setPledgeSuccess] = useState(false);
 
-  console.log("AUTH user id:", auth?.user?.id);
-  console.log("FUNDRAISER owner:", fundraiser?.owner);
+  // Show success message for a reliable amount of time
+  useEffect(() => {
+    if (!pledgeSuccess) return;
+    const t = setTimeout(() => setPledgeSuccess(false), 2500);
+    return () => clearTimeout(t);
+  }, [pledgeSuccess]);
+
+  // ======================================================
+  // DATA LOADING
+  // ======================================================
+  const { fundraiser, isLoading, error } = useFundraiser(id, refreshKey);
 
   const buildingId = fundraiser?.building;
   const { building } = useBuilding(buildingId);
-  const buildingName = building?.name ?? "Building";
+  const buildingName = building?.name ?? "Strata Community";
 
-  // ✅ guards FIRST (prevents blank page crashes)
+  // ======================================================
+  // LOADING / ERROR GUARDS
+  // ======================================================
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="h-8 w-2/3 rounded bg-slate-200/70" />
         <div className="mt-4 h-4 w-1/2 rounded bg-slate-200/70" />
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 h-64 rounded-2xl bg-slate-200/60" />
-          <div className="h-64 rounded-2xl bg-slate-200/60" />
-        </div>
       </div>
     );
   }
@@ -40,7 +59,7 @@ function FundraiserPage() {
             Couldn’t load fundraiser
           </h1>
           <p className="mt-2 text-blueDeep/80">
-            Something went wrong. Try refreshing, or go back to the homepage.
+            Something went wrong. Try refreshing, or go back.
           </p>
           <Link
             to="/"
@@ -55,8 +74,32 @@ function FundraiserPage() {
 
   if (!fundraiser) return null;
 
-  const isOwner = auth?.user?.id === fundraiser.owner?.id;
+  // ======================================================
+  // DERIVED VALUES
+  // ======================================================
+  const title = fundraiser.title ?? "Fundraiser";
+  const description = fundraiser.description ?? "";
+  const isOpen = !!fundraiser.is_open;
 
+  // money totals: try a few possible backend field names safely
+  const goal = Number(fundraiser.goal ?? 0);
+  const raised = Number(fundraiser.total_pledged ?? 0);
+  const progress = Math.round(Number(fundraiser.progress_percent ?? 0));
+  const isFunded = !!fundraiser.is_funded;
+
+  const created = fundraiser.date_created
+    ? new Date(fundraiser.date_created).toLocaleDateString()
+    : null;
+
+  const ownerName = fundraiser.owner_name ?? `User ${fundraiser.owner}`;
+  const isOwner = Number(auth?.user?.id) === Number(fundraiser.owner);
+
+  // If you only consider "money fundraisers" as those with a goal:
+  const hasMoney = goal > 0;
+
+  // ======================================================
+  // ACTIONS
+  // ======================================================
   const handleDeleteFundraiser = async () => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this fundraiser?\n\n" +
@@ -69,36 +112,22 @@ function FundraiserPage() {
       const token = auth?.token || localStorage.getItem("token");
       await deleteFundraiser(fundraiser.id, token);
 
-      // nicest redirect: back to the building page
-      navigate(`/buildings/${fundraiser.building}`);
+      // redirect back to the building (or communities list)
+      navigate(buildingId ? `/buildings/${buildingId}` : "/strata-communities");
     } catch (err) {
       console.error(err);
-      alert(err.message || "Something went wrong while deleting.");
+      alert(err.message || "Failed to delete fundraiser");
     }
   };
 
-  // Derived display values
-  const title = fundraiser.title ?? "Untitled fundraiser";
-  const description =
-    fundraiser.description ??
-    "No description yet — but every boost helps. Check back for updates.";
-  const ownerName = fundraiser.owner_name ?? fundraiser.owner ?? "Neighbour";
-  const created = fundraiser.date_created
-    ? new Date(fundraiser.date_created).toLocaleDateString()
-    : null;
-
-  const isOpen = fundraiser.is_open ?? true;
-
-  const goal = Number(fundraiser.goal ?? 0);
-  const raised = Number(fundraiser.total_pledged ?? fundraiser.raised ?? 0);
-  const hasMoney = goal > 0;
-  const progress = hasMoney
-    ? Math.min(100, Math.round((raised / goal) * 100))
-    : 0;
-
+  // ======================================================
+  // PAGE UI
+  // ======================================================
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
-      {/* PAGE HEADER (mini hero) */}
+      {/* ======================================================
+          HEADER / MINI HERO
+      ====================================================== */}
       <section className="relative overflow-hidden bg-blueDeep">
         <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-20 sm:pb-24">
           {/* Mini nav / status */}
@@ -167,11 +196,15 @@ function FundraiserPage() {
         </div>
       </section>
 
-      {/* CONTENT */}
+      {/* ======================================================
+          CONTENT
+      ====================================================== */}
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-20">
           <div className="grid gap-8 lg:grid-cols-3">
-            {/* LEFT */}
+            {/* ======================================================
+                LEFT COLUMN
+            ====================================================== */}
             <div className="lg:col-span-2 space-y-6">
               {/* Image card */}
               <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-blueDeep/10 shadow-sm">
@@ -219,11 +252,44 @@ function FundraiserPage() {
               </div>
             </div>
 
-            {/* RIGHT */}
+            {/* ======================================================
+                RIGHT COLUMN / CHIP IN
+            ====================================================== */}
             <aside className="lg:col-span-1">
               <div className="sticky top-6 rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
                 <h2 className="text-lg font-extrabold text-ink">Chip in</h2>
 
+                {/* Success banner (no alerts; reliable timing) */}
+                {pledgeSuccess && (
+                  <div className="mt-3 rounded-xl bg-blueBright/10 p-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/10">
+                    Pledge submitted! 🎉
+                  </div>
+                )}
+
+                {/* Contribute button */}
+                <button
+                  className="mt-6 w-full rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
+                  disabled={!isOpen}
+                  onClick={() => setShowPledgeForm(true)}
+                >
+                  {isOpen ? "Contribute" : "Fundraiser closed"}
+                </button>
+
+                {/* Pledge form */}
+                {showPledgeForm && (
+                  <PledgeForm
+                    fundraiserId={fundraiser.id}
+                    isOpen={isOpen}
+                    onCancel={() => setShowPledgeForm(false)}
+                    onSuccess={() => {
+                      setShowPledgeForm(false);
+                      setRefreshKey((k) => k + 1); // ✅ refetch fundraiser totals
+                      setPledgeSuccess(true); // ✅ show banner (timer handled by useEffect)
+                    }}
+                  />
+                )}
+
+                {/* Progress */}
                 {hasMoney ? (
                   <div className="mt-4">
                     <div className="flex items-end justify-between">
@@ -253,14 +319,8 @@ function FundraiserPage() {
                   </p>
                 )}
 
-                <button
-                  className="mt-6 w-full rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
-                  disabled={!isOpen}
-                >
-                  {isOpen ? "Contribute" : "Fundraiser closed"}
-                </button>
-
-                <button className="mt-3 w-full rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition">
+                {/* Share */}
+                <button className="mt-6 w-full rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition">
                   Share
                 </button>
 
