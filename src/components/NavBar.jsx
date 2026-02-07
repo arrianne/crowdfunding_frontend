@@ -8,6 +8,7 @@ const linkActive = "text-white";
 
 function NavBar() {
   const { auth, setAuth } = useAuth();
+  const username = auth?.username;
 
   const handleLogout = () => {
     window.localStorage.removeItem("token");
@@ -79,33 +80,30 @@ function NavBar() {
         {/* Right actions */}
         <div className="flex items-center gap-3">
           {isLoggedIn ? (
-            <Link
-              to="/"
-              className="hidden sm:inline text-sm font-semibold text-white/80 hover:text-white transition"
-              onClick={handleLogout}
-            >
-              Log out
-            </Link>
+            <>
+              {username && (
+                <span className="hidden sm:inline text-sm font-semibold text-white/90">
+                  Hi, {username}
+                </span>
+              )}
+
+              <Link
+                to="/"
+                className="hidden sm:inline text-sm font-semibold text-white/80 hover:text-white transition"
+                onClick={handleLogout}
+              >
+                Log out
+              </Link>
+            </>
           ) : (
-            <div className="hidden sm:flex items-center gap-1 text-sm font-semibold text-white/80">
-              <Link to="/login" className="hover:text-white transition">
-                Log in
-              </Link>
-
-              <span className="opacity-60">/</span>
-
-              <Link to="/signup" className="hover:text-white transition">
-                Sign up
-              </Link>
-            </div>
+            // whatever you show when logged out (Login / Sign up)
+            <Link
+              to="/login"
+              className="hidden sm:inline text-sm font-semibold text-white/80 hover:text-white transition"
+            >
+              Log in
+            </Link>
           )}
-
-          <Link
-            to="/user"
-            className="inline-flex items-center rounded-md border border-white/60 px-4 py-2 text-sm font-semibold text-white hover:border-white hover:bg-white/10 transition"
-          >
-            Get started
-          </Link>
         </div>
       </div>
     </header>

@@ -10,6 +10,7 @@ function HomePage() {
   const { buildings } = useBuildings();
   const { auth } = useAuth();
   const navigate = useNavigate();
+  const username = auth?.username;
 
   const handleClick = () => {
     if (auth?.token) {

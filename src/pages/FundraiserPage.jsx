@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { useAuth } from "../hooks/use-auth";
@@ -36,7 +36,7 @@ function FundraiserPage() {
   // ======================================================
   const { fundraiser, isLoading, error } = useFundraiser(id, refreshKey);
 
-  const buildingId = fundraiser?.building;
+  const buildingId = fundraiser?.building ?? null;
   const { building } = useBuilding(buildingId);
   const buildingName = building?.name ?? "Strata Community";
 
@@ -82,25 +82,83 @@ function FundraiserPage() {
   const description = fundraiser.description ?? "";
   const isOpen = !!fundraiser.is_open;
 
-  // money totals: try a few possible backend field names safely
-  const goal = Number(fundraiser.goal ?? 0);
-  const raised = Number(fundraiser.total_pledged ?? 0);
-  const progress = Math.round(Number(fundraiser.progress_percent ?? 0));
-  const isFunded = !!fundraiser.is_funded;
+  // ----- funded (handle booleans, 0/1, "true"/"false") -----
+  const isFundedUI =
+    !isOpen ||
+    ["true", "1", "yes"].includes(
+      String(fundraiser.is_funded ?? "").toLowerCase(),
+    );
 
-  const created = fundraiser.date_created
-    ? new Date(fundraiser.date_created).toLocaleDateString()
-    : null;
+  // ----- money fields (handle multiple possible backend names) -----
+  const goal =
+    Number(
+      fundraiser.goal ?? fundraiser.target ?? fundraiser.goal_amount ?? 0,
+    ) || 0;
 
-  const isOwner = Number(auth?.user_id) === Number(fundraiser.owner);
+  const raised =
+    Number(
+      fundraiser.total_pledged ??
+        fundraiser.raised ??
+        fundraiser.amount_raised ??
+        fundraiser.total_raised ??
+        0,
+    ) || 0;
 
+  // If funded but totals aren't populated, make UI look complete.
+  // If goal is missing/0, fall back to raised so it doesn't show $0 weirdly.
+  const displayRaised = isFundedUI ? goal || raised : raised;
+
+  // ----- percent (force 100 when funded; clamp; avoid NaN) -----
+  const computedFromMoney = goal > 0 ? (raised / goal) * 100 : 0;
+
+  const progressRaw =
+    fundraiser.progress_percent != null
+      ? Number(fundraiser.progress_percent)
+      : computedFromMoney;
+
+  const progress = isFundedUI ? 100 : progressRaw;
+
+  const progressClamped = Number.isFinite(progress)
+    ? Math.max(0, Math.min(100, Math.round(progress)))
+    : 0;
+
+  // "Created" (format nicely, but don’t crash if missing)
+  const createdRaw =
+    fundraiser.date_created ??
+    fundraiser.created_at ??
+    fundraiser.created ??
+    null;
+
+  const created = createdRaw ? new Date(createdRaw).toLocaleDateString() : null;
+
+  // Owner display name (works with flat fields, nested objects, or numeric IDs)
   const ownerNameText =
-    fundraiser.owner_username ??
     fundraiser.owner_name ??
-    `User ${fundraiser.owner}`;
+    fundraiser.owner?.name ??
+    fundraiser.owner?.username ??
+    fundraiser.owner?.email ??
+    (typeof fundraiser.owner === "number"
+      ? `User #${fundraiser.owner}`
+      : null) ??
+    "Unknown";
 
-  // If you only consider "money fundraisers" as those with a goal:
-  const hasMoney = goal > 0;
+  // Owner check (requires auth.user or auth.user_id or similar)
+  const currentUserId =
+    auth?.user?.id ?? auth?.user_id ?? auth?.id ?? auth?.userId ?? null;
+
+  const ownerId =
+    typeof fundraiser.owner === "object"
+      ? fundraiser.owner?.id
+      : (fundraiser.owner ?? fundraiser.owner_id ?? null);
+
+  const isOwner =
+    currentUserId != null &&
+    ownerId != null &&
+    Number(currentUserId) === Number(ownerId);
+
+  // Do we have "money" style fields?
+  const hasMoney =
+    isFundedUI || goal > 0 || raised > 0 || fundraiser.goal != null;
 
   // ======================================================
   // ACTIONS
@@ -121,7 +179,7 @@ function FundraiserPage() {
       navigate(buildingId ? `/buildings/${buildingId}` : "/strata-communities");
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to delete fundraiser");
+      alert(err?.message || "Failed to delete fundraiser");
     }
   };
 
@@ -134,6 +192,12 @@ function FundraiserPage() {
           HEADER / MINI HERO
       ====================================================== */}
       <section className="relative overflow-hidden bg-blueDeep">
+        <div className="mt-3 text-xs text-white/70">
+          debug: is_funded={String(fundraiser.is_funded)} | isFunded=
+          {String(isFundedUI)} | goal={goal} | raised={raised} |
+          progressClamped=
+          {progressClamped} | hasMoney={String(hasMoney)}
+        </div>
         <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-20 sm:pb-24">
           {/* Mini nav / status */}
           <div className="flex flex-wrap items-center gap-2">
@@ -149,7 +213,7 @@ function FundraiserPage() {
             </span>
 
             <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 ring-1 ring-white/15">
-              {isOpen ? "Open" : "Closed"}
+              {isOpen ? "Open" : isFundedUI ? "Funded" : "Closed"}
             </span>
           </div>
 
@@ -200,6 +264,13 @@ function FundraiserPage() {
               </button>
             </div>
           )}
+
+          {/* TEMP DEBUG (remove once it looks right) */}
+          <div className="mt-3 text-xs text-white/60">
+            debug: is_funded={String(fundraiser.is_funded)} | isFundedUI=
+            {String(isFundedUI)} | goal={goal} | raised={raised} | progress=
+            {progressClamped}
+          </div>
         </div>
       </section>
 
@@ -210,8 +281,8 @@ function FundraiserPage() {
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-20">
           <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
             {/* ======================================================
-      LEFT COLUMN
-  ====================================================== */}
+                LEFT COLUMN
+            ====================================================== */}
             <div className="space-y-6">
               {/* Image card */}
               <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-blueDeep/10 shadow-sm">
@@ -255,8 +326,8 @@ function FundraiserPage() {
             </div>
 
             {/* ======================================================
-      RIGHT COLUMN / CHIP IN
-  ====================================================== */}
+                RIGHT COLUMN / CHIP IN
+            ====================================================== */}
             <aside>
               <div className="sticky top-6 rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm">
                 <h2 className="text-lg font-extrabold text-ink">Chip in</h2>
@@ -272,7 +343,11 @@ function FundraiserPage() {
                   disabled={!isOpen}
                   onClick={() => setShowPledgeForm(true)}
                 >
-                  {isOpen ? "Contribute" : "Fundraiser closed"}
+                  {isOpen
+                    ? "Contribute"
+                    : isFundedUI
+                      ? "Funded 🎉"
+                      : "Fundraiser closed"}
                 </button>
 
                 {showPledgeForm && (
@@ -295,19 +370,19 @@ function FundraiserPage() {
                         Raised
                       </p>
                       <p className="text-sm font-semibold text-blueDeep/70">
-                        {progress}%
+                        {progressClamped}%
                       </p>
                     </div>
 
                     <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-blueBright/10">
                       <div
-                        className="h-full rounded-full bg-blueBright"
-                        style={{ width: `${progress}%` }}
+                        className="h-full rounded-full bg-blueBright transition-all"
+                        style={{ width: `${progressClamped}%` }}
                       />
                     </div>
 
                     <div className="mt-3 flex justify-between text-sm text-blueDeep/80">
-                      <span>${raised.toLocaleString()}</span>
+                      <span>${displayRaised.toLocaleString()}</span>
                       <span>${goal.toLocaleString()} goal</span>
                     </div>
                   </div>

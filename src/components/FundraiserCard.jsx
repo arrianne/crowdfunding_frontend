@@ -4,18 +4,35 @@ function FundraiserCard({ fundraiserData, building }) {
   const fundraiserLink = `/fundraisers/${fundraiserData.id}`;
   const buildingLink = `/buildings/${fundraiserData.building}`;
 
+  // Use is_funded if you have it, otherwise fall back to "not open"
+  const isFullyFunded =
+    Boolean(fundraiserData.is_funded) || !fundraiserData.is_open;
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <Link to={fundraiserLink} className="block">
-        <img
-          src={fundraiserData.image}
-          alt={fundraiserData.title}
-          className="h-44 w-full rounded-xl object-cover"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = "/images/placeholder.png";
-          }}
-        />
+        {/* Image wrapper so we can overlay */}
+        <div className="relative">
+          <img
+            src={fundraiserData.image}
+            alt={fundraiserData.title}
+            className="h-44 w-full rounded-xl object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "/images/placeholder.png";
+            }}
+          />
+
+          {/* ✅ Overlay across image */}
+          {isFullyFunded && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-blueDeep/70">
+              <span className="text-sm font-extrabold tracking-wide text-white">
+                Fully funded
+              </span>
+            </div>
+          )}
+        </div>
+
         <h3 className="mt-4 text-lg font-extrabold tracking-tight text-ink">
           {fundraiserData.title}
         </h3>
