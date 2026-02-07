@@ -8,6 +8,7 @@ import useBuilding from "../hooks/use-building";
 import { deleteFundraiser } from "../api/delete-fundraiser";
 import PledgeForm from "../components/PledgeForm";
 import PledgesList from "../components/PledgeList";
+
 function FundraiserPage() {
   // ======================================================
   // ROUTING + AUTH
@@ -91,8 +92,12 @@ function FundraiserPage() {
     ? new Date(fundraiser.date_created).toLocaleDateString()
     : null;
 
-  const ownerName = fundraiser.owner_name ?? `User ${fundraiser.owner}`;
-  const isOwner = Number(auth?.user?.id) === Number(fundraiser.owner);
+  const isOwner = Number(auth?.user_id) === Number(fundraiser.owner);
+
+  const ownerNameText =
+    fundraiser.owner_username ??
+    fundraiser.owner_name ??
+    `User ${fundraiser.owner}`;
 
   // If you only consider "money fundraisers" as those with a goal:
   const hasMoney = goal > 0;
@@ -172,7 +177,9 @@ function FundraiserPage() {
           {/* Meta */}
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
             {created && <span>Created: {created}</span>}
-            <span>By {ownerName}</span>
+            <span>
+              By <span className="users">{ownerNameText}</span>
+            </span>
           </div>
 
           {/* Owner actions */}

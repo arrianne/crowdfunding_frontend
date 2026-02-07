@@ -1,16 +1,26 @@
 import useFundraisers from "../hooks/use-fundraisers";
 import useBuildings from "../hooks/use-buildings";
-import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/use-auth";
+import { Link, useNavigate } from "react-router-dom";
 
 import FundraiserCard from "../components/FundraiserCard";
 
 function HomePage() {
   const { fundraisers } = useFundraisers();
   const { buildings } = useBuildings();
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (auth?.token) {
+      navigate("/fundraisers/new");
+    } else {
+      navigate("/login", { state: { from: { pathname: "/fundraisers/new" } } });
+    }
+  };
 
   const buildingsById = Object.fromEntries(buildings.map((b) => [b.id, b]));
 
-  console.log("Buildings:", buildings);
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       {/* HERO */}
@@ -24,7 +34,7 @@ function HomePage() {
 
             {/* Headline */}
             <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-blueSky sm:text-5xl md:text-6xl">
-              Raise help, not stress.
+              Raise funds, not stress.
             </h1>
 
             {/* Supporting copy */}
@@ -36,12 +46,15 @@ function HomePage() {
 
             {/* CTAs */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                to="/fundraisers/new"
+              <button
+                type="button"
+                onClick={handleClick}
                 className="rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition"
               >
-                Start a fundraiser
-              </Link>
+                {auth?.token
+                  ? "Start a fundraiser"
+                  : "Log in to start your fundraiser"}
+              </button>
 
               <Link
                 to="/fundraisers"
@@ -76,6 +89,7 @@ function HomePage() {
           </svg>
         </div>
       </section>
+
       {/* CONTENT */}
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-24 pb-28">
@@ -104,7 +118,7 @@ function HomePage() {
                 <FundraiserCard
                   key={fundraiserData.id}
                   fundraiserData={fundraiserData}
-                  building={building} // ✅ pass the matched building object
+                  building={building}
                 />
               );
             })}

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import postLogin from "../api/post-login.js";
+import getUser from "../api/get-user.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth.js";
 
 function LoginForm() {
   const navigate = useNavigate();
   const { setAuth } = useAuth();
+
+  const [error, setError] = useState(null);
 
   const [credentials, setCredentials] = useState({
     username: "",
@@ -20,15 +23,41 @@ function LoginForm() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!credentials.username || !credentials.password) return;
 
-    postLogin(credentials.username, credentials.password).then((response) => {
-      window.localStorage.setItem("token", response.token);
-      setAuth({ token: response.token });
+    setError(""); // clear old errors
+
+    try {
+      const { token, user_id } = await postLogin(
+        credentials.username,
+        credentials.password,
+      );
+
+      const user = await getUser(user_id, token);
+
+      window.localStorage.setItem("token", token);
+      window.localStorage.setItem("user_id", user_id);
+      window.localStorage.setItem("username", user.username);
+
+      setAuth({ token, user_id, username: user.username });
+
       navigate("/");
-    });
+    } catch (err) {
+      console.error(err);
+
+      // Default message
+      let message = "Something went wrong. Please try again.";
+
+      // If your postLogin throws something like:
+      // Error("Login failed (400): {...}")
+      if (typeof err?.message === "string" && err.message.includes("400")) {
+        message = "Incorrect username or password. Please try again.";
+      }
+
+      setError(message);
+    }
   };
 
   return (
@@ -70,6 +99,12 @@ function LoginForm() {
       </div>
 
       {/* Submit */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       <button
         type="submit"
         className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-pinky/30 transition disabled:opacity-50"
