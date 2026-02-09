@@ -2,8 +2,10 @@ import useFundraisers from "../hooks/use-fundraisers";
 import useBuildings from "../hooks/use-buildings";
 import { useAuth } from "../hooks/use-auth";
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import FundraiserCard from "../components/FundraiserCard";
+import FundraiserStatusFilter from "../components/FundraiserStatusFilter";
 
 function HomePage() {
   const { fundraisers } = useFundraisers();
@@ -21,6 +23,25 @@ function HomePage() {
   };
 
   const buildingsById = Object.fromEntries(buildings.map((b) => [b.id, b]));
+
+  // Filter state: "all" | "open" | "closed"
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Simple derived lists (no useMemo)
+  const openFundraisers = fundraisers.filter((f) => !!f.is_open);
+  const closedFundraisers = fundraisers.filter((f) => !f.is_open);
+
+  // Counts for the filter pills
+  const counts = {
+    all: fundraisers.length,
+    open: openFundraisers.length,
+    closed: closedFundraisers.length,
+  };
+
+  // Apply filter
+  let visibleFundraisers = fundraisers;
+  if (statusFilter === "open") visibleFundraisers = openFundraisers;
+  if (statusFilter === "closed") visibleFundraisers = closedFundraisers;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
@@ -111,8 +132,15 @@ function HomePage() {
             </p>
           </div>
 
+          <FundraiserStatusFilter
+            className="mt-8"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            counts={counts}
+          />
+
           <div className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {fundraisers.map((fundraiserData) => {
+            {visibleFundraisers.map((fundraiserData) => {
               const building = buildingsById[fundraiserData.building];
 
               return (
