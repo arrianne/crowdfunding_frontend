@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import postSignup from "../api/post-signup.js";
 import postLogin from "../api/post-login.js";
 import { useAuth } from "../hooks/use-auth.js";
+import getUser from "../api/get-user.js";
 
 function SignupForm() {
   const navigate = useNavigate();
@@ -48,15 +49,22 @@ function SignupForm() {
       // 1) Create user account
       await postSignup(form.username, form.email, form.password);
 
-      // 2) Immediately log them in and store token
-      const loginResponse = await postLogin(form.username, form.password);
+      // 2) Log them in (token + user_id)
+      const { token, user_id } = await postLogin(form.username, form.password);
 
-      window.localStorage.setItem("token", loginResponse.token);
-      setAuth({ token: loginResponse.token });
+      // 3) Fetch user so navbar has the username
+      const user = await getUser(user_id, token);
+
+      // 4) Persist like LoginForm does
+      window.localStorage.setItem("token", token);
+      window.localStorage.setItem("user_id", user_id);
+      window.localStorage.setItem("username", user.username);
+
+      // 5) Update auth state like LoginForm does
+      setAuth({ token, user_id, username: user.username });
 
       navigate("/", { replace: true });
     } catch (err) {
-      // Try to display DRF-style field errors nicely
       const message =
         (err?.username && err.username[0]) ||
         (err?.email && err.email[0]) ||
