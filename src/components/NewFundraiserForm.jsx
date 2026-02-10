@@ -5,13 +5,11 @@ import { useNavigate } from "react-router-dom";
 import NewBuildingForm from "./NewBuildingForm";
 
 function NewFundraiserForm() {
-  const { auth } = useAuth(); // ✅ now auth exists if you need it
+  const { auth } = useAuth();
   const { buildings, isLoadingBuildings } = useBuildings();
-
   const navigate = useNavigate();
 
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
-
   const isNewBuilding = selectedBuildingId === "__new__";
 
   const [newBuilding, setNewBuilding] = useState({
@@ -23,10 +21,12 @@ function NewFundraiserForm() {
     postcode: "",
   });
 
+  // ✅ Form + field errors (banner + inline)
+  const [formError, setFormError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({}); // e.g. { cts_number: "Already exists" }
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-
-  // ✅ moved INSIDE component
   const [goal, setGoal] = useState("");
   const [image, setImage] = useState("");
 
@@ -40,13 +40,49 @@ function NewFundraiserForm() {
         newBuilding.cts_number.trim() &&
         newBuilding.street.trim());
 
-  // handle submit
+  // Helper: turn DRF error objects into { field: "msg" }
+  const parseApiErrors = (data) => {
+    if (!data || typeof data !== "object") return null;
+
+    const next = {};
+    for (const [key, value] of Object.entries(data)) {
+      const msg = Array.isArray(value) ? value.join(" ") : String(value);
+      next[key] = msg;
+    }
+    return next;
+  };
+
+  const resetErrors = () => {
+    setFormError("");
+    setFieldErrors({});
+  };
+
+  // Wrap onChange so we can clear field errors as user edits
+  const handleNewBuildingChange = (updater) => {
+    setNewBuilding((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+
+      // Clear CTS error as soon as they change CTS number
+      if (prev.cts_number !== next.cts_number && fieldErrors?.cts_number) {
+        setFieldErrors((fe) => {
+          const copy = { ...fe };
+          delete copy.cts_number;
+          return copy;
+        });
+      }
+
+      // Also clear top banner if they're actively fixing the form
+      if (formError) setFormError("");
+
+      return next;
+    });
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    resetErrors();
 
     const token = auth?.token || localStorage.getItem("token");
-
     const headers = {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Token ${token}` }),
@@ -55,6 +91,9 @@ function NewFundraiserForm() {
     try {
       let buildingId;
 
+      // ======================================================
+      // 1) Create building (if needed)
+      // ======================================================
       if (selectedBuildingId === "__new__") {
         const address = [
           newBuilding.street.trim(),
@@ -85,11 +124,25 @@ function NewFundraiserForm() {
         const buildingData = await buildingRes.json().catch(() => null);
 
         if (!buildingRes.ok) {
-          const message =
-            buildingData?.detail ||
-            (buildingData && JSON.stringify(buildingData)) ||
-            `Building create failed (${buildingRes.status})`;
-          throw new Error(message);
+          const nextFieldErrors = parseApiErrors(buildingData);
+
+          if (nextFieldErrors) {
+            setFieldErrors(nextFieldErrors);
+
+            if (nextFieldErrors.cts_number) {
+              setFormError(
+                "That CTS number is already in use. Try a different one.",
+              );
+            } else if (buildingData?.detail) {
+              setFormError(String(buildingData.detail));
+            } else {
+              setFormError("Please fix the highlighted fields and try again.");
+            }
+          } else {
+            setFormError(`Building create failed (${buildingRes.status})`);
+          }
+
+          return; // ✅ stop here, keep user in the form
         }
 
         buildingId = buildingData.id;
@@ -97,6 +150,9 @@ function NewFundraiserForm() {
         buildingId = Number(selectedBuildingId);
       }
 
+      // ======================================================
+      // 2) Create fundraiser
+      // ======================================================
       const fundraiserPayload = {
         title: title.trim(),
         description: description.trim(),
@@ -117,17 +173,33 @@ function NewFundraiserForm() {
       const fundraiserData = await fundraiserRes.json().catch(() => null);
 
       if (!fundraiserRes.ok) {
-        const message =
-          fundraiserData?.detail ||
-          (fundraiserData && JSON.stringify(fundraiserData)) ||
-          `Fundraiser create failed (${fundraiserRes.status})`;
-        throw new Error(message);
+        const nextFieldErrors = parseApiErrors(fundraiserData);
+
+        // If you later want inline errors for title/description/goal,
+        // you can store these separately (e.g. fundraiserFieldErrors)
+        if (nextFieldErrors?.detail) {
+          setFormError(String(nextFieldErrors.detail));
+          return;
+        }
+
+        if (fundraiserData?.detail) {
+          setFormError(String(fundraiserData.detail));
+          return;
+        }
+
+        // Fallback: show something readable
+        setFormError(
+          nextFieldErrors
+            ? "Please check the form fields and try again."
+            : `Fundraiser create failed (${fundraiserRes.status})`,
+        );
+        return;
       }
 
-      navigate(`/fundraiser/${fundraiserData.id}`);
+      navigate(`/fundraisers/${fundraiserData.id}`);
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      setFormError(err?.message || "Something went wrong. Please try again.");
     }
   };
 
@@ -140,6 +212,13 @@ function NewFundraiserForm() {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        {/* ✅ Nice banner error */}
+        {formError && (
+          <div className="rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700 ring-1 ring-red-200">
+            {formError}
+          </div>
+        )}
+
         {/* Title */}
         <div>
           <label className="block text-sm font-semibold text-ink">
@@ -148,7 +227,10 @@ function NewFundraiserForm() {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (formError) setFormError("");
+            }}
             placeholder="e.g. Fix the leaking roof"
             className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm font-medium shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
             required
@@ -163,7 +245,10 @@ function NewFundraiserForm() {
           <textarea
             rows={4}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (formError) setFormError("");
+            }}
             placeholder="What’s going on? Why does it matter?"
             className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm font-medium shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
             required
@@ -180,7 +265,10 @@ function NewFundraiserForm() {
             min="1"
             step="1"
             value={goal}
-            onChange={(e) => setGoal(e.target.value)}
+            onChange={(e) => {
+              setGoal(e.target.value);
+              if (formError) setFormError("");
+            }}
             placeholder="e.g. 2500"
             className="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2 focus:border-pinky focus:ring-pinky"
             required
@@ -196,13 +284,16 @@ function NewFundraiserForm() {
           <input
             type="url"
             value={image}
-            onChange={(e) => setImage(e.target.value)}
+            onChange={(e) => {
+              setImage(e.target.value);
+              if (formError) setFormError("");
+            }}
             placeholder="https://example.com/photo.jpg"
             className="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2 focus:border-pinky focus:ring-pinky"
           />
 
           {image && (
-            <p className="mt-2 text-xs text-slate-600 break-all">
+            <p className="mt-2 break-all text-xs text-slate-600">
               Preview: {image}
             </p>
           )}
@@ -223,11 +314,11 @@ function NewFundraiserForm() {
                 disabled={isNewBuilding}
                 onChange={(e) => {
                   setSelectedBuildingId(e.target.value);
+                  resetErrors();
                 }}
                 className="w-full appearance-none rounded-xl border border-blueDeep/20 bg-white px-4 py-3 pr-10 text-sm font-semibold text-ink shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
               >
                 <option value="">Select a building</option>
-
                 {buildings.map((building) => (
                   <option key={building.id} value={building.id}>
                     {building.name}
@@ -237,7 +328,10 @@ function NewFundraiserForm() {
 
               <button
                 type="button"
-                onClick={() => setSelectedBuildingId("__new__")}
+                onClick={() => {
+                  resetErrors();
+                  setSelectedBuildingId("__new__");
+                }}
                 className="mt-3 text-sm font-semibold text-blueDeep hover:underline"
               >
                 + Add a new building
@@ -246,8 +340,10 @@ function NewFundraiserForm() {
               {isNewBuilding && (
                 <NewBuildingForm
                   value={newBuilding}
-                  onChange={setNewBuilding}
+                  onChange={handleNewBuildingChange}
+                  errors={fieldErrors}
                   onCancel={() => {
+                    resetErrors();
                     setSelectedBuildingId("");
                     setNewBuilding({
                       name: "",
@@ -282,7 +378,7 @@ function NewFundraiserForm() {
           <button
             type="submit"
             disabled={!canContinue}
-            className="inline-flex rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Continue
           </button>

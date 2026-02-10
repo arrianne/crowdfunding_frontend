@@ -3,13 +3,27 @@ export default function NewBuildingForm({
   onChange,
   onCancel,
   showCancel = true,
+  errors = {}, // ✅ add this
 }) {
   // helper to update a single field
   const setField = (key) => (e) =>
     onChange({ ...value, [key]: e.target.value });
 
+  const fieldClass = (key) =>
+    [
+      "mt-1 w-full rounded-xl border px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2",
+      errors?.[key]
+        ? "border-red-300 focus:ring-red-200 focus:border-red-400"
+        : "border-blueDeep/20 focus:ring-blueBright/20 focus:border-blueBright",
+    ].join(" ");
+
+  const ErrorText = ({ name }) =>
+    errors?.[name] ? (
+      <p className="mt-2 text-sm font-semibold text-red-600">{errors[name]}</p>
+    ) : null;
+
   return (
-    <div className="rounded-xl bg-blueBright/5 p-4 space-y-4">
+    <div className="rounded-xl bg-blueBright/5 p-4 space-y-4 ring-1 ring-blueDeep/10">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-blueDeep">
           New building details
@@ -33,10 +47,11 @@ export default function NewBuildingForm({
         <input
           value={value.name}
           onChange={setField("name")}
-          className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm"
+          className={fieldClass("name")}
           placeholder="e.g. Pleasantville Apartments"
           required
         />
+        <ErrorText name="name" />
       </div>
 
       <div>
@@ -46,9 +61,10 @@ export default function NewBuildingForm({
         <input
           value={value.street}
           onChange={setField("street")}
-          className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm"
+          className={fieldClass("street")}
           placeholder="e.g. 96 Goldieslie Rd"
         />
+        <ErrorText name="street" />
       </div>
 
       <div>
@@ -58,10 +74,11 @@ export default function NewBuildingForm({
         <input
           value={value.cts_number}
           onChange={setField("cts_number")}
-          className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm"
+          className={fieldClass("cts_number")}
           placeholder="e.g. 12345"
           required
         />
+        <ErrorText name="cts_number" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -70,8 +87,9 @@ export default function NewBuildingForm({
           <input
             value={value.suburb}
             onChange={setField("suburb")}
-            className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm"
+            className={fieldClass("suburb")}
           />
+          <ErrorText name="suburb" />
         </div>
 
         <div>
@@ -79,8 +97,9 @@ export default function NewBuildingForm({
           <input
             value={value.state}
             onChange={setField("state")}
-            className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm"
+            className={fieldClass("state")}
           />
+          <ErrorText name="state" />
         </div>
 
         <div>
@@ -90,8 +109,9 @@ export default function NewBuildingForm({
           <input
             value={value.postcode}
             onChange={setField("postcode")}
-            className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm"
+            className={fieldClass("postcode")}
           />
+          <ErrorText name="postcode" />
         </div>
       </div>
     </div>

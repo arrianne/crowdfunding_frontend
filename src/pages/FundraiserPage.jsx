@@ -192,12 +192,6 @@ function FundraiserPage() {
           HEADER / MINI HERO
       ====================================================== */}
       <section className="relative overflow-hidden bg-blueDeep">
-        <div className="mt-3 text-xs text-white/70">
-          debug: is_funded={String(fundraiser.is_funded)} | isFunded=
-          {String(isFundedUI)} | goal={goal} | raised={raised} |
-          progressClamped=
-          {progressClamped} | hasMoney={String(hasMoney)}
-        </div>
         <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-20 sm:pb-24">
           {/* Mini nav / status */}
           <div className="flex flex-wrap items-center gap-2">
@@ -264,13 +258,6 @@ function FundraiserPage() {
               </button>
             </div>
           )}
-
-          {/* TEMP DEBUG (remove once it looks right) */}
-          <div className="mt-3 text-xs text-white/60">
-            debug: is_funded={String(fundraiser.is_funded)} | isFundedUI=
-            {String(isFundedUI)} | goal={goal} | raised={raised} | progress=
-            {progressClamped}
-          </div>
         </div>
       </section>
 
