@@ -4,6 +4,7 @@ import useBuilding from "../hooks/use-building";
 import useBuildingFundraisers from "../hooks/use-building-fundraiser";
 import FundraiserCard from "../components/FundraiserCard";
 import { deleteBuilding } from "../api/delete-building";
+import useIsOwner from "../hooks/use-is-owner";
 
 function BuildingPage() {
   const { id } = useParams();
@@ -11,6 +12,9 @@ function BuildingPage() {
   const { auth } = useAuth();
 
   const { building, isLoadingBuilding, buildingError } = useBuilding(id);
+
+  const { isOwner } = useIsOwner(building);
+
   const { fundraisers, isLoadingFundraisers, fundraisersError } =
     useBuildingFundraisers(id);
 
@@ -45,19 +49,6 @@ function BuildingPage() {
   }
 
   if (!building) return null;
-
-  const currentUserId =
-    auth?.user?.id ?? auth?.user_id ?? auth?.id ?? auth?.userId ?? null;
-
-  const ownerId =
-    typeof building.owner === "object"
-      ? building.owner?.id
-      : (building.owner ?? building.owner_id ?? null);
-
-  const isOwner =
-    currentUserId != null &&
-    ownerId != null &&
-    Number(currentUserId) === Number(ownerId);
 
   const handleDeleteBuilding = async () => {
     const confirmed = window.confirm(

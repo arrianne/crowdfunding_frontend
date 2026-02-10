@@ -9,6 +9,8 @@ import { deleteFundraiser } from "../api/delete-fundraiser";
 import PledgeForm from "../components/PledgeForm";
 import PledgesList from "../components/PledgeList";
 
+import useIsOwner from "../hooks/use-is-owner";
+
 function FundraiserPage() {
   // ======================================================
   // ROUTING + AUTH
@@ -35,6 +37,8 @@ function FundraiserPage() {
   // DATA LOADING
   // ======================================================
   const { fundraiser, isLoading, error } = useFundraiser(id, refreshKey);
+
+  const { isOwner } = useIsOwner(fundraiser);
 
   const buildingId = fundraiser?.building ?? null;
   const { building } = useBuilding(buildingId);
@@ -141,20 +145,6 @@ function FundraiserPage() {
       ? `User #${fundraiser.owner}`
       : null) ??
     "Unknown";
-
-  // Owner check (requires auth.user or auth.user_id or similar)
-  const currentUserId =
-    auth?.user?.id ?? auth?.user_id ?? auth?.id ?? auth?.userId ?? null;
-
-  const ownerId =
-    typeof fundraiser.owner === "object"
-      ? fundraiser.owner?.id
-      : (fundraiser.owner ?? fundraiser.owner_id ?? null);
-
-  const isOwner =
-    currentUserId != null &&
-    ownerId != null &&
-    Number(currentUserId) === Number(ownerId);
 
   // Do we have "money" style fields?
   const hasMoney =
