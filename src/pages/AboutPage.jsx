@@ -150,7 +150,7 @@ function About() {
                 Start a fundraiser in minutes and rally your neighbours.
               </p>
               <Link
-                to="/create"
+                to="/fundraisers/new"
                 className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15 transition"
               >
                 Start a fundraiser

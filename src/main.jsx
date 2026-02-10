@@ -5,6 +5,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./index.css";
 
+import NotFoundPage from "./pages/NotFoundPage.jsx";
+
 import HomePage from "./pages/HomePage.jsx";
 import getUser from "./api/get-user.js";
 import FundraiserPage from "./pages/FundraiserPage.jsx";
@@ -29,6 +31,7 @@ const myRouter = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: "*", element: <NotFoundPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "auth", element: <AuthProvider /> },
