@@ -78,12 +78,16 @@ function HomePage() {
                   : "Log in to start your fundraiser"}
               </button>
 
-              <Link
-                to="/fundraisers"
-                className="rounded-xl bg-white/20 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
+              <button
+                onClick={() => {
+                  document
+                    .getElementById("fundraisers")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition"
               >
                 Browse fundraisers
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -139,7 +143,10 @@ function HomePage() {
             counts={counts}
           />
 
-          <div className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3"
+            id="fundraisers"
+          >
             {visibleFundraisers.map((fundraiserData) => {
               const building = buildingsById[fundraiserData.building];
 

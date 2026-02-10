@@ -46,7 +46,18 @@ function BuildingPage() {
 
   if (!building) return null;
 
-  const isOwner = auth?.user?.id === building?.owner?.id;
+  const currentUserId =
+    auth?.user?.id ?? auth?.user_id ?? auth?.id ?? auth?.userId ?? null;
+
+  const ownerId =
+    typeof building.owner === "object"
+      ? building.owner?.id
+      : (building.owner ?? building.owner_id ?? null);
+
+  const isOwner =
+    currentUserId != null &&
+    ownerId != null &&
+    Number(currentUserId) === Number(ownerId);
 
   const handleDeleteBuilding = async () => {
     const confirmed = window.confirm(

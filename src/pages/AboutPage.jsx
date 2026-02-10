@@ -176,11 +176,12 @@ function About() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
-                to="/fundraisers"
+                to="/#fundraisers"
                 className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition"
               >
                 Explore fundraisers
               </Link>
+
               <Link
                 to="/contact"
                 className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 hover:bg-slate-200 transition"
