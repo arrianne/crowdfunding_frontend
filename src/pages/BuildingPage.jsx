@@ -74,11 +74,11 @@ function BuildingPage() {
     <>
       {/* HERO / HEADER */}
       <section className="relative overflow-hidden bg-blueDeep">
-        <div className="mx-auto max-w-6xl px-6 pt-12 pb-16">
+        <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-20 sm:pb-24">
           {/* Mini nav */}
           <div className="relative z-10 flex flex-wrap items-center gap-2">
             <Link
-              to="/"
+              to="/strata-communities"
               className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25 hover:bg-white/20 transition"
             >
               ← Back
