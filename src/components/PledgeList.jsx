@@ -1,4 +1,83 @@
-function PledgesList({ pledges = [] }) {
+import { useState } from "react";
+import PledgeForm from "./PledgeForm";
+import { deletePledge } from "../api/delete-pledge";
+
+function isPledgeOwner(pledge, currentUserId) {
+  if (!currentUserId) return false;
+  const ownerId = pledge.supporter ?? pledge.supporter_id ?? pledge.owner;
+  return ownerId != null && String(ownerId) === String(currentUserId);
+}
+
+function PledgeActions({
+  pledge,
+  fundraiserId,
+  isOpen,
+  currentUserId,
+  token,
+  onRefresh,
+}) {
+  const [editing, setEditing] = useState(false);
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this pledge? This cannot be undone.",
+    );
+    if (!confirmed) return;
+    try {
+      await deletePledge(pledge.id, token);
+      onRefresh?.();
+    } catch (err) {
+      console.error(err);
+      alert(err?.message ?? "Failed to delete pledge");
+    }
+  };
+
+  if (!isPledgeOwner(pledge, currentUserId)) return null;
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={() => setEditing((e) => !e)}
+        className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition"
+      >
+        {editing ? "Cancel edit" : "Edit"}
+      </button>
+      <button
+        type="button"
+        onClick={handleDelete}
+        className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200 hover:bg-red-50 transition"
+      >
+        Delete
+      </button>
+      {editing && (
+        <div className="mt-2 w-full">
+          <PledgeForm
+            fundraiserId={fundraiserId}
+            initialPledge={pledge}
+            isOpen={isOpen}
+            onSuccess={() => {
+              setEditing(false);
+              onRefresh?.();
+            }}
+            onCancel={() => setEditing(false)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PledgesList({
+  pledges = [],
+  fundraiserId = null,
+  isOpen = true,
+  currentUserId = null,
+  onRefresh,
+}) {
+  const token =
+    typeof window !== "undefined" ? window.localStorage.getItem("token") : null;
+
   const moneyPledges = pledges.filter((p) => p.pledge_type === "MONEY");
   const skillPledges = pledges.filter((p) => p.pledge_type === "SKILL");
 
@@ -39,7 +118,7 @@ function PledgesList({ pledges = [] }) {
               {moneyPledges.map((p) => {
                 const who = p.anonymous
                   ? "Anonymous"
-                  : `Supporter #${p.supporter}`;
+                  : `Supporter #${p.supporter ?? p.supporter_id ?? "?"}`;
 
                 return (
                   <li
@@ -67,6 +146,15 @@ function PledgesList({ pledges = [] }) {
                         “{p.comment}”
                       </p>
                     )}
+
+                    <PledgeActions
+                      pledge={p}
+                      fundraiserId={fundraiserId}
+                      isOpen={isOpen}
+                      currentUserId={currentUserId}
+                      token={token}
+                      onRefresh={onRefresh}
+                    />
                   </li>
                 );
               })}
@@ -95,7 +183,7 @@ function PledgesList({ pledges = [] }) {
               {skillPledges.map((p) => {
                 const who = p.anonymous
                   ? "Anonymous"
-                  : `Supporter #${p.supporter}`;
+                  : `Supporter #${p.supporter ?? p.supporter_id ?? "?"}`;
 
                 return (
                   <li
@@ -127,9 +215,18 @@ function PledgesList({ pledges = [] }) {
 
                     {p.comment && (
                       <p className="mt-3 text-sm text-blueDeep/70">
-                        “{p.comment}”
+                        "{p.comment}"
                       </p>
                     )}
+
+                    <PledgeActions
+                      pledge={p}
+                      fundraiserId={fundraiserId}
+                      isOpen={isOpen}
+                      currentUserId={currentUserId}
+                      token={token}
+                      onRefresh={onRefresh}
+                    />
                   </li>
                 );
               })}

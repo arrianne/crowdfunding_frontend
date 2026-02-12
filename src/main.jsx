@@ -45,6 +45,7 @@ const myRouter = createBrowserRouter([
 
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
+      { path: "user", element: <UserPage /> },
 
       /* Catch-all: custom 404 for unknown paths */
       { path: "*", element: <NotFoundPage /> },

@@ -299,7 +299,13 @@ function FundraiserPage() {
               </div>
 
               {/* Pledges */}
-              <PledgesList pledges={fundraiser.pledges} />
+              <PledgesList
+                pledges={fundraiser.pledges}
+                fundraiserId={fundraiser.id}
+                isOpen={isOpen}
+                currentUserId={auth?.user_id ?? undefined}
+                onRefresh={() => setRefreshKey((k) => k + 1)}
+              />
             </div>
 
             {/* ======================================================

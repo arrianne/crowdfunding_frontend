@@ -1,22 +1,61 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { postPledge } from "../api/post-pledge";
+import { putPledge } from "../api/put-pledge";
 
-function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
+function PledgeForm({
+  fundraiserId,
+  onSuccess,
+  onCancel,
+  isOpen = true,
+  initialPledge = null,
+}) {
   const { auth } = useAuth();
+  const isEditMode = !!initialPledge;
 
   const token = auth?.token || localStorage.getItem("token");
   const isLoggedIn = !!token;
 
   // --- Form state ---
-  const [pledgeType, setPledgeType] = useState("MONEY"); // "MONEY" | "SKILL"
+  const [pledgeType, setPledgeType] = useState(
+    initialPledge?.pledge_type ?? "MONEY",
+  );
+  const [amount, setAmount] = useState(
+    initialPledge?.pledge_type === "MONEY"
+      ? String(initialPledge?.amount ?? "")
+      : "",
+  );
+  const [skillDescription, setSkillDescription] = useState(
+    initialPledge?.pledge_type === "SKILL"
+      ? String(initialPledge?.skill_description ?? "")
+      : "",
+  );
+  const [hours, setHours] = useState(
+    initialPledge?.hours != null ? String(initialPledge.hours) : "",
+  );
+  const [comment, setComment] = useState(
+    String(initialPledge?.comment ?? ""),
+  );
+  const [anonymous, setAnonymous] = useState(!!initialPledge?.anonymous);
 
-  const [amount, setAmount] = useState("");
-  const [skillDescription, setSkillDescription] = useState("");
-  const [hours, setHours] = useState("");
-
-  const [comment, setComment] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
+  // Sync form when initialPledge changes (e.g. when opening edit)
+  useEffect(() => {
+    if (!initialPledge) return;
+    setPledgeType(initialPledge.pledge_type ?? "MONEY");
+    setAmount(
+      initialPledge.pledge_type === "MONEY"
+        ? String(initialPledge.amount ?? "")
+        : "",
+    );
+    setSkillDescription(
+      String(initialPledge.skill_description ?? ""),
+    );
+    setHours(
+      initialPledge.hours != null ? String(initialPledge.hours) : "",
+    );
+    setComment(String(initialPledge.comment ?? ""));
+    setAnonymous(!!initialPledge.anonymous);
+  }, [initialPledge?.id]);
 
   // --- UX state ---
   const [submitting, setSubmitting] = useState(false);
@@ -24,7 +63,8 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
   const inFlight = useRef(false);
 
   const canSubmit = (() => {
-    if (!isLoggedIn || !isOpen || submitting) return false;
+    if (!isLoggedIn || submitting) return false;
+    if (!isEditMode && !isOpen) return false;
 
     if (pledgeType === "MONEY") {
       return Number(amount) > 0;
@@ -35,18 +75,32 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
   })();
 
   const resetForm = () => {
-    setPledgeType("MONEY");
-    setAmount("");
-    setSkillDescription("");
-    setHours("");
-    setComment("");
-    setAnonymous(false);
+    if (initialPledge) {
+      setPledgeType(initialPledge.pledge_type ?? "MONEY");
+      setAmount(
+        initialPledge.pledge_type === "MONEY"
+          ? String(initialPledge.amount ?? "")
+          : "",
+      );
+      setSkillDescription(String(initialPledge.skill_description ?? ""));
+      setHours(
+        initialPledge.hours != null ? String(initialPledge.hours) : "",
+      );
+      setComment(String(initialPledge.comment ?? ""));
+      setAnonymous(!!initialPledge.anonymous);
+    } else {
+      setPledgeType("MONEY");
+      setAmount("");
+      setSkillDescription("");
+      setHours("");
+      setComment("");
+      setAnonymous(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prevent double submits
     if (inFlight.current) return;
     inFlight.current = true;
 
@@ -75,13 +129,17 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
               anonymous,
             };
 
-      const created = await postPledge(payload, token);
-
-      resetForm();
-      onSuccess?.(created);
+      if (isEditMode) {
+        const updated = await putPledge(initialPledge.id, payload, token);
+        onSuccess?.(updated);
+      } else {
+        const created = await postPledge(payload, token);
+        resetForm();
+        onSuccess?.(created);
+      }
     } catch (err) {
       console.error(err);
-      setError(err.message || "Failed to submit pledge");
+      setError(err.message || (isEditMode ? "Failed to update pledge" : "Failed to submit pledge"));
     } finally {
       setSubmitting(false);
       inFlight.current = false;
@@ -90,7 +148,9 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
 
   return (
     <div className="mt-6 rounded-xl bg-blueBright/5 p-4 ring-1 ring-blueDeep/10">
-      <h3 className="text-sm font-extrabold text-ink">Make a pledge</h3>
+      <h3 className="text-sm font-extrabold text-ink">
+        {isEditMode ? "Edit your pledge" : "Make a pledge"}
+      </h3>
 
       {!isOpen && (
         <p className="mt-2 text-sm text-blueDeep/70">
@@ -217,16 +277,22 @@ function PledgeForm({ fundraiserId, onSuccess, onCancel, isOpen = true }) {
             disabled={!canSubmit}
             className="flex-1 rounded-lg bg-blueBright px-4 py-2 text-sm font-semibold text-white hover:bg-blueDeep transition disabled:opacity-50"
           >
-            {submitting ? "Submitting…" : "Submit pledge"}
+            {submitting
+              ? (isEditMode ? "Saving…" : "Submitting…")
+              : isEditMode
+                ? "Save changes"
+                : "Submit pledge"}
           </button>
 
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition"
-          >
-            Cancel
-          </button>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </form>
     </div>
