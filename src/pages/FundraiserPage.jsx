@@ -11,6 +11,8 @@ import PledgesList from "../components/PledgeList";
 
 import useIsOwner from "../hooks/use-is-owner";
 
+import ReactConfetti from "react-confetti";
+
 function FundraiserPage() {
   // ======================================================
   // ROUTING + AUTH
@@ -25,6 +27,19 @@ function FundraiserPage() {
   const [refreshKey, setRefreshKey] = useState(0); // triggers refetch after pledge
   const [showPledgeForm, setShowPledgeForm] = useState(false);
   const [pledgeSuccess, setPledgeSuccess] = useState(false);
+
+  // Track viewport size for confetti (responsive + fixed overlay)
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Show success message for a reliable amount of time
   useEffect(() => {
@@ -178,6 +193,19 @@ function FundraiserPage() {
   // ======================================================
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
+      {!isOpen && isFundedUI && (
+        <div
+          className="pointer-events-none fixed inset-0 z-50"
+          aria-hidden
+        >
+          <ReactConfetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={false}
+            numberOfPieces={300}
+          />
+        </div>
+      )}
       {/* ======================================================
           HEADER / MINI HERO
       ====================================================== */}
