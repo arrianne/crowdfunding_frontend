@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
-/* Tailwind v4 theme tokens */
+/* Tailwind v4 theme tokens – adjusted for WCAG contrast (Lighthouse accessibility) */
 @theme {
   --color-pinky: #fd8892;
-  --color-blueDeep: #445ef2;
-  --color-blueBright: #417cf2;
-  --color-blueSky: #85d3f2;
+  --color-blueDeep: #2f48b8;
+  --color-blueBright: #2860b8;
+  --color-blueSky: #9fdaf6;
   --color-ink: #0d0d0d;
 }
