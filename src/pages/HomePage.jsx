@@ -44,13 +44,9 @@ function HomePage() {
   if (statusFilter === "closed") visibleFundraisers = closedFundraisers;
 
   // Sort by most recently created first
-  visibleFundraisers = [...visibleFundraisers].sort((a, b) => {
-    const dateA =
-      new Date(a.date_created ?? a.created_at ?? a.created ?? 0).getTime();
-    const dateB =
-      new Date(b.date_created ?? b.created_at ?? b.created ?? 0).getTime();
-    return dateB - dateA; // descending (newest first)
-  });
+  visibleFundraisers = [...visibleFundraisers].sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
