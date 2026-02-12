@@ -31,7 +31,6 @@ const myRouter = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "*", element: <NotFoundPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       { path: "auth", element: <AuthProvider /> },
@@ -47,7 +46,8 @@ const myRouter = createBrowserRouter([
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
 
-      { path: "*", element: <p>Page not found</p> },
+      /* Catch-all: custom 404 for unknown paths */
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);

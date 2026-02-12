@@ -44,9 +44,9 @@ function EditFundraiserPage() {
     return null;
   }
 
-  // ---- Permission check (IMPORTANT FIX) ----
+  // ---- Permission check: only owner can edit ----
 
-  const userId = auth?.user?.id;
+  const userId = auth?.user_id ?? auth?.user?.id;
   const ownerId = fundraiser.owner;
 
   // Only block if we are CERTAIN they are not the owner
