@@ -78,13 +78,13 @@ function NavBar() {
           `${linkBase} ${isActive ? linkActive : ""}`
         }
       >
-        User
+        Dashboard
       </NavLink>
     </>
   );
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50">
+    <header className="sticky top-0 left-0 right-0 z-50 bg-blueDeep shadow-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         {/* Logo / Brand */}
         <Link

@@ -47,7 +47,7 @@ function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       {/* HERO */}
       <section className="relative overflow-hidden bg-blueDeep">
-        <div className="relative mx-auto max-w-6xl px-6 pt-28 pb-56 md:pt-36 lg:pb-64">
+        <div className="relative mx-auto max-w-6xl px-6 pt-32 pb-56 md:pt-40 lg:pb-64">
           <div className="max-w-2xl">
             {/* Tag */}
             <p className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/30">
