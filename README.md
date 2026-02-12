@@ -1,16 +1,83 @@
-# React + Vite
+# Strata Boost — Crowdfunding Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React single-page application for **Strata Boost**, a community crowdfunding platform for strata and body-corporate buildings. Neighbours can create fundraisers for repairs and community projects, and others can pledge money or skills to help.
 
-Currently, two official plugins are available:
+This frontend talks to the Strata Boost Django REST API (the `crowdfunding_backend` project) for auth, fundraisers, buildings, and pledges.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What it does
 
-## React Compiler
+- **Browse fundraisers** — Home page lists all fundraisers with filters for open/closed status.
+- **Fundraisers** — View a fundraiser, create a new one (when logged in), and edit or delete your own.
+- **Buildings** — View strata buildings and their fundraisers; create or edit buildings when authorised.
+- **Pledges** — Pledge money or skills to a fundraiser; view and manage your pledges on your user page.
+- **Auth** — Sign up, log in, and token-based session (stored in `localStorage`). Protected routes for creating/editing content.
+- **User page** — See your profile and list of pledges.
+- **Static pages** — About and Contact; Strata Communities directory.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the ESLint configuration
+- **React** 19 + **Vite** 7
+- **React Router** 7 (client-side routing)
+- **Tailwind CSS** 4 (via `@tailwindcss/vite`)
+- **ESLint** (React hooks + refresh)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project structure
+
+| Path | Purpose |
+|------|--------|
+| `src/api/` | Fetch helpers for users, buildings, fundraisers, pledges, login/signup |
+| `src/components/` | Reusable UI (Layout, NavBar, Footer, forms, cards, auth) |
+| `src/hooks/` | Data hooks (e.g. `useFundraisers`, `useBuildings`, `useAuth`) |
+| `src/pages/` | Route-level pages (Home, Fundraiser, Building, User, Login, etc.) |
+
+## Getting started
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- The Strata Boost backend (`crowdfunding_backend`) running locally or deployed
+
+### Install and run
+
+```bash
+npm install
+```
+
+Create a `.env` in the project root with the backend API base URL:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+For a deployed backend, use that URL instead (e.g. `https://your-api.herokuapp.com`).
+
+```bash
+npm run dev
+```
+
+The app will be available at the URL Vite prints (usually `http://localhost:5173`).
+
+### Other scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run build` | Production build (output in `dist/`) |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | Run ESLint |
+
+## Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_URL` | Yes | Base URL of the Strata Boost backend API (no trailing slash). |
+
+## Backend
+
+This app expects the Strata Boost Django REST API for:
+
+- Users, auth (`/api-token-auth/`, `/users/`)
+- Buildings (`/buildings/`)
+- Fundraisers (`/fundraisers/`)
+- Pledges (`/pledges/`)
+
+See the backend repository for API details, auth, and deployment.
