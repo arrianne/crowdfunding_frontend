@@ -32,60 +32,62 @@ function StatsCarousel({ totalFundraisers, totalPledges, fundedCount }) {
       className="relative w-screen left-1/2 -ml-[50vw] overflow-hidden bg-pinky pb-14 pt-12"
       aria-label="Platform statistics"
     >
-      <div className="relative mx-auto max-w-5xl px-6">
-        <div className="min-h-[180px] sm:min-h-[200px]">
-          {slides.map((slide, index) => (
-            <div
-              key={slide.label}
-              className="absolute inset-0 flex min-h-[180px] items-center gap-8 px-6 transition-opacity duration-500 sm:min-h-[200px] sm:gap-12"
-              style={{
-                opacity: index === activeIndex ? 1 : 0,
-                pointerEvents: index === activeIndex ? "auto" : "none",
-              }}
-              aria-hidden={index !== activeIndex}
-            >
-              <img
-                src="/images/fundraiserlogo.png"
-                alt=""
-                className="h-24 w-24 shrink-0 object-contain sm:h-32 sm:w-32"
-              />
-              <div className="flex flex-col justify-center">
-                <div
-                  className="mb-2 h-1 w-16 rounded-full bg-blueDeep sm:mb-3 sm:h-1.5 sm:w-20"
-                  aria-hidden
-                />
-                <div className="flex flex-wrap items-center gap-3 gap-y-0 sm:gap-4">
-                  <p className="text-7xl font-extrabold tracking-tight text-white sm:text-8xl md:text-9xl">
-                    {slide.value.toLocaleString()}
-                  </p>
-                  <p className="text-xl font-bold text-white/95 sm:text-2xl md:text-3xl">
-                    {slide.label}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="relative mx-auto max-w-4xl px-6 flex flex-col lg:flex-row lg:items-center gap-20 lg:gap-12">
+        {/* Left: logo + copy — equal half, content centred, text left */}
+        <div className="flex flex-col items-center lg:w-1/2 lg:flex-shrink-0">
+          <p className="mt-5 w-full max-w-md border-b-2 border-blueDeep pb-3 text-left text-lg font-semibold text-white sm:max-w-lg sm:text-xl">
+            Communal living is better when neighbours can come together.
+          </p>
+          <p className="mt-4 w-full max-w-md text-left text-base text-white/95 leading-relaxed sm:max-w-lg sm:text-lg">
+            StrataBoost makes it easy for strata communities to raise funds for
+            shared spaces, repairs, and improvements — simply, transparently,
+            and without the stress.
+          </p>
         </div>
 
-        {/* Dots */}
-        <div
-          className="relative mt-12 flex justify-start gap-2 px-6"
-          role="tablist"
-          aria-label="Stats carousel"
-        >
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              role="tab"
-              aria-selected={index === activeIndex}
-              aria-label={`Show stat ${index + 1}`}
-              className={`h-2.5 w-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-pinky ${
-                index === activeIndex ? "bg-white" : "bg-white/50"
-              }`}
-              onClick={() => setActiveIndex(index)}
-            />
-          ))}
+        {/* Right: carousel — equal half, centred block */}
+        <div className="flex flex-col items-center lg:w-1/2 lg:flex-shrink-0 lg:justify-center">
+          <div className="relative min-h-[140px] w-full max-w-sm sm:min-h-[160px]">
+            {slides.map((slide, index) => (
+              <div
+                key={slide.label}
+                className="absolute inset-0 flex flex-col items-center justify-center gap-1 transition-opacity duration-500"
+                style={{
+                  opacity: index === activeIndex ? 1 : 0,
+                  pointerEvents: index === activeIndex ? "auto" : "none",
+                }}
+                aria-hidden={index !== activeIndex}
+              >
+                <p className="text-7xl font-extrabold tracking-tight text-white sm:text-8xl md:text-9xl lg:text-[7rem] xl:text-8xl">
+                  {slide.value.toLocaleString()}
+                </p>
+                <p className="text-sm font-semibold text-white/90 sm:text-base md:text-lg">
+                  {slide.label}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Dots */}
+          <div
+            className="mt-8 flex justify-center gap-2"
+            role="tablist"
+            aria-label="Stats carousel"
+          >
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                role="tab"
+                aria-selected={index === activeIndex}
+                aria-label={`Show stat ${index + 1}`}
+                className={`h-2.5 w-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-pinky ${
+                  index === activeIndex ? "bg-white" : "bg-white/50"
+                }`}
+                onClick={() => setActiveIndex(index)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
