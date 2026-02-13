@@ -32,7 +32,7 @@ function StatsCarousel({ totalFundraisers, totalPledges, fundedCount }) {
       className="relative w-screen left-1/2 -ml-[50vw] overflow-hidden bg-pinky pb-14 pt-12"
       aria-label="Platform statistics"
     >
-      <div className="relative mx-auto max-w-4xl px-6 flex flex-col lg:flex-row lg:items-center gap-20 lg:gap-12">
+      <div className="relative mx-auto max-w-4xl px-6 flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-12">
         {/* Left: logo + copy — equal half, content centred, text left */}
         <div className="flex flex-col items-center lg:w-1/2 lg:flex-shrink-0">
           <p className="mt-5 w-full max-w-md border-b-2 border-blueDeep pb-3 text-left text-lg font-semibold text-white sm:max-w-lg sm:text-xl">

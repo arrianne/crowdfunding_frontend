@@ -43,7 +43,9 @@ function HomePage() {
   const totalPledges = fundraisers.reduce(
     (sum, f) =>
       sum +
-      (Array.isArray(f.pledges) ? f.pledges.length : (Number(f.pledge_count) || 0)),
+      (Array.isArray(f.pledges)
+        ? f.pledges.length
+        : Number(f.pledge_count) || 0),
     0,
   );
   const fundedCount = fundraisers.filter((f) => Boolean(f.is_funded)).length;
@@ -63,7 +65,7 @@ function HomePage() {
       {/* HERO */}
       <section className="relative overflow-hidden bg-blueDeep">
         <div className="relative mx-auto max-w-6xl px-6 pt-32 pb-56 md:pt-40 lg:pb-64">
-          <div className="max-w-2xl">
+          <div className="max-w-xl">
             {/* Tag */}
             <p className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/30">
               Neighbours helping neighbours ✨
@@ -71,7 +73,8 @@ function HomePage() {
 
             {/* Headline */}
             <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-blueSky sm:text-5xl md:text-6xl">
-              Raise funds, not stress.
+              Raise funds,
+              <br /> not stress.
             </h1>
 
             {/* Supporting copy */}
@@ -107,12 +110,12 @@ function HomePage() {
           </div>
         </div>
 
-        {/* Building image pinned bottom-right */}
-        <div className="pointer-events-none absolute bottom-0 right-0 z-10 max-h-[420px] overflow-hidden">
+        {/* Building image pinned bottom-right — scales with viewport to avoid overlap */}
+        <div className="pointer-events-none absolute bottom-0 right-0 z-10 max-h-[280px] overflow-hidden sm:max-h-[340px] md:max-h-[420px]">
           <img
             src="/images/hero-building.png"
             alt=""
-            className="w-[650px] sm:w-[780px] md:w-[920px] lg:w-[1080px] opacity-95"
+            className="max-h-full w-[min(650px,85vw)] object-right object-contain opacity-95 sm:w-[min(780px,80vw)] md:w-[min(920px,75vw)] lg:w-[min(1080px,70vw)]"
           />
         </div>
 
