@@ -150,11 +150,12 @@ function FundraiserPage() {
 
   const created = createdRaw ? new Date(createdRaw).toLocaleDateString() : null;
 
-  // Owner display name (works with flat fields, nested objects, or numeric IDs)
+  // Owner display name: backend sends owner_username on fundraiser; support other shapes too
   const ownerNameText =
+    fundraiser.owner_username ??
     fundraiser.owner_name ??
-    fundraiser.owner?.name ??
     fundraiser.owner?.username ??
+    fundraiser.owner?.name ??
     fundraiser.owner?.email ??
     (typeof fundraiser.owner === "number"
       ? `User #${fundraiser.owner}`

@@ -1,12 +1,12 @@
 // src/api/get-user.js
 export default async function getUser(userId, token) {
+  const headers = {};
+  if (token) {
+    headers.Authorization = `Token ${token}`;
+  }
   const response = await fetch(
     `${import.meta.env.VITE_API_URL}/users/${userId}/`,
-    {
-      headers: {
-        Authorization: `Token ${token}`,
-      },
-    },
+    { headers },
   );
 
   if (!response.ok) {

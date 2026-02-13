@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import FundraiserCard from "../components/FundraiserCard";
 import FundraiserStatusFilter from "../components/FundraiserStatusFilter";
+import StatsCarousel from "../components/StatsCarousel";
 
 function HomePage() {
   const { fundraisers } = useFundraisers();
@@ -38,6 +39,15 @@ function HomePage() {
     closed: closedFundraisers.length,
   };
 
+  // Stats for the carousel (pledges: sum from list if API includes them)
+  const totalPledges = fundraisers.reduce(
+    (sum, f) =>
+      sum +
+      (Array.isArray(f.pledges) ? f.pledges.length : (Number(f.pledge_count) || 0)),
+    0,
+  );
+  const fundedCount = fundraisers.filter((f) => Boolean(f.is_funded)).length;
+
   // Apply filter
   let visibleFundraisers = fundraisers;
   if (statusFilter === "open") visibleFundraisers = openFundraisers;
@@ -49,7 +59,7 @@ function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       {/* HERO */}
       <section className="relative overflow-hidden bg-blueDeep">
         <div className="relative mx-auto max-w-6xl px-6 pt-32 pb-56 md:pt-40 lg:pb-64">
@@ -115,11 +125,18 @@ function HomePage() {
           >
             <path
               d="M0,40 C240,80 480,80 720,60 960,40 1200,20 1440,0 L1440,80 L0,80 Z"
-              fill="white"
+              className="fill-pinky"
             />
           </svg>
         </div>
       </section>
+
+      {/* STATS CAROUSEL */}
+      <StatsCarousel
+        totalFundraisers={fundraisers.length}
+        totalPledges={totalPledges}
+        fundedCount={fundedCount}
+      />
 
       {/* CONTENT */}
       <section className="bg-white">

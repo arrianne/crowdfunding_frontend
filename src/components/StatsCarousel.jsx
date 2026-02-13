@@ -29,7 +29,7 @@ function StatsCarousel({ totalFundraisers, totalPledges, fundedCount }) {
 
   return (
     <section
-      className="relative -mt-20 overflow-hidden bg-pinky pb-14 pt-8"
+      className="relative w-screen left-1/2 -ml-[50vw] overflow-hidden bg-pinky pb-14 pt-12"
       aria-label="Platform statistics"
     >
       <div className="relative mx-auto max-w-5xl px-6">
@@ -54,7 +54,7 @@ function StatsCarousel({ totalFundraisers, totalPledges, fundedCount }) {
                   className="mb-2 h-1 w-16 rounded-full bg-blueDeep sm:mb-3 sm:h-1.5 sm:w-20"
                   aria-hidden
                 />
-                <div className="flex flex-wrap items-baseline gap-3 gap-y-0 sm:gap-4">
+                <div className="flex flex-wrap items-center gap-3 gap-y-0 sm:gap-4">
                   <p className="text-7xl font-extrabold tracking-tight text-white sm:text-8xl md:text-9xl">
                     {slide.value.toLocaleString()}
                   </p>
