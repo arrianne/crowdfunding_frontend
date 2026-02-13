@@ -1,8 +1,17 @@
 import { Link } from "react-router-dom";
 import useBuildings from "../hooks/use-buildings";
+import useFundraisers from "../hooks/use-fundraisers";
 
 function StrataCommunitiesPage() {
   const { buildings, isLoadingBuildings, buildingsError } = useBuildings();
+  const { fundraisers } = useFundraisers();
+
+  // Count fundraisers per building (frontend-only, no backend changes)
+  const fundraiserCountByBuilding = (fundraisers ?? []).reduce((acc, f) => {
+    const bid = f.building;
+    if (bid != null) acc[bid] = (acc[bid] ?? 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
@@ -57,14 +66,23 @@ function StrataCommunitiesPage() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {buildings.map((building) => (
-                <div
+                <Link
                   key={building.id}
-                  className="flex flex-col justify-between rounded-2xl bg-white p-6 ring-1 ring-blueDeep/10 shadow-sm"
+                  to={`/buildings/${building.id}`}
+                  className="group block overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-pinky/20 transition-all hover:shadow-xl hover:ring-pinky/40"
                 >
-                  <div>
-                    <h2 className="text-xl font-extrabold text-ink">
+                  {/* Main card content */}
+                  <div className="p-6 pb-0">
+                    {/* Fundraiser count */}
+                    <span className="mb-4 inline-flex items-center justify-center rounded-xl bg-blueSky/20 px-3 py-2 text-sm font-extrabold text-blueDeep">
+                      {(fundraiserCountByBuilding[building.id] ?? 0) === 1
+                        ? "1 fundraiser"
+                        : `${fundraiserCountByBuilding[building.id] ?? 0} fundraisers`}
+                    </span>
+
+                    <h2 className="text-xl font-extrabold tracking-tight text-ink">
                       {building.name}
                     </h2>
 
@@ -73,17 +91,25 @@ function StrataCommunitiesPage() {
                         {building.address}
                       </p>
                     )}
+
+                    {/* Pill tags */}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <span className="rounded-full border border-blueBright/30 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blueDeep">
+                        Strata
+                      </span>
+                      <span className="rounded-full border border-blueBright/30 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blueDeep">
+                        Community
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="mt-6">
-                    <Link
-                      to={`/buildings/${building.id}`}
-                      className="inline-flex items-center rounded-xl bg-blueBright px-5 py-3 text-sm font-semibold text-white hover:bg-blueDeep transition"
-                    >
-                      View community
-                    </Link>
+                  {/* Pink footer strip */}
+                  <div className="mt-6 bg-pinky px-6 py-3 text-center transition-[filter] group-hover:brightness-95">
+                    <span className="text-sm font-semibold text-white">
+                      View community →
+                    </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

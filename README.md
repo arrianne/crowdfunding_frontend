@@ -4,6 +4,26 @@ A React single-page application for **Strata Boost**, a community crowdfunding p
 
 This frontend talks to the Strata Boost Django REST API (the `crowdfunding_backend` project) for auth, fundraisers, buildings, and pledges.
 
+## Screenshots
+
+| Screenshot | Description |
+|------------|-------------|
+| ![Homepage (Desktop)](public/images/homepage1%20-%20desktop.png) | Homepage on desktop — hero section, stats carousel, and fundraiser cards. |
+| ![Homepage (Mobile)](public/images/homepage%20-%20mobile.png) | Homepage on mobile — responsive layout. |
+| ![Fundraisers Homepage](public/images/fundraisers-homepage.png) | Fundraisers listing on the homepage with filters and cards. |
+| ![Fundraisers Mobile](public/images/fundraisers-mobile.png) | Fundraisers view on mobile devices. |
+| ![Stats Carousel](public/images/stats-carousel.png) | Stats carousel component showing key metrics (pledges, fundraisers, etc.). |
+| ![Strata Communities Page](public/images/strata-communities-page.png) | Strata communities directory — buildings with fundraiser counts and links. |
+| ![Login (Desktop)](public/images/login-desktop.png) | Login page on desktop. |
+| ![Login (Mobile)](public/images/login-mobile.png) | Login page on mobile. |
+| ![Register (Desktop)](public/images/register-desktop.png) | Sign-up/registration page on desktop. |
+| ![Register (Mobile)](public/images/register-mobile.png) | Sign-up/registration page on mobile. |
+| ![New Building Form](public/images/new-building-form.png) | Form for creating a new strata building/community. |
+| ![New Fundraiser Form](public/images/new-fundraiser-form.png) | Form for creating a new fundraiser. |
+| ![Edit/Delete (Owner)](public/images/edit-delete-owner-fundraiser.png) | Fundraiser detail view when logged in as the owner — Edit and Delete buttons are shown. |
+| ![No Edit/Delete (Non-owner)](public/images/no-edit-delete-nonowner.png) | Fundraiser detail view for non-owners — Edit and Delete buttons are hidden. |
+| ![App Screenshot](public/images/Screenshot%202026-02-14%20at%209.19.22%20am.png) | General app screenshot. |
+
 ## What it does
 
 - **Browse fundraisers** — Home page lists all fundraisers with filters for open/closed status.
