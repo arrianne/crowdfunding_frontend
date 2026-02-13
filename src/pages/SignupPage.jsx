@@ -5,7 +5,7 @@ function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       <section className="relative overflow-hidden bg-blueDeep">
-        <div className="relative mx-auto max-w-6xl px-6 pt-28 pb-56 md:pt-36 lg:pb-64">
+        <div className="relative z-10 mx-auto max-w-6xl px-6 pt-28 pb-56 md:pt-36 lg:pb-64">
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div className="max-w-2xl">
               <p className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/30">
@@ -47,7 +47,8 @@ function SignupPage() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute bottom-0 right-0 z-10 max-h-[420px] overflow-hidden">
+        {/* Building image pinned bottom-right (behind content) */}
+        <div className="pointer-events-none absolute bottom-0 right-0 z-0 max-h-[420px] overflow-hidden">
           <img
             src="/images/hero-building.png"
             alt=""

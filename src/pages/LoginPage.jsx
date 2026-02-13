@@ -6,7 +6,7 @@ function LoginPage() {
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       {/* HERO */}
       <section className="relative overflow-hidden bg-blueDeep">
-        <div className="relative mx-auto max-w-6xl px-6 pt-28 pb-56 md:pt-36 lg:pb-64">
+        <div className="relative z-10 mx-auto max-w-6xl px-6 pt-28 pb-56 md:pt-36 lg:pb-64">
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             {/* Left: copy */}
             <div className="max-w-2xl">
@@ -68,6 +68,11 @@ function LoginPage() {
                   </span>
                 </div>
 
+                <p className="mt-4 text-xs text-slate-500">
+                  By logging in, you agree to be a decent human and not start a
+                  fundraiser for “New office espresso machine (emergency)”.
+                </p>
+
                 <div className="mt-6">
                   <LoginForm />
                 </div>
@@ -88,17 +93,12 @@ function LoginPage() {
                   </Link>
                 </div>
               </div>
-
-              <p className="mt-4 text-xs text-white/65">
-                By logging in, you agree to be a decent human and not start a
-                fundraiser for “New office espresso machine (emergency)”.
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Building image pinned bottom-right */}
-        <div className="pointer-events-none absolute bottom-0 right-0 z-10 max-h-[420px] overflow-hidden">
+        {/* Building image pinned bottom-right (behind content) */}
+        <div className="pointer-events-none absolute bottom-0 right-0 z-0 max-h-[420px] overflow-hidden">
           <img
             src="/images/hero-building.png"
             alt=""
