@@ -22,7 +22,7 @@ export default function NewBuildingForm({
 
   const ErrorText = ({ name }) =>
     errors?.[name] ? (
-      <p className="mt-2 text-sm font-semibold text-red-600">{errors[name]}</p>
+      <p className="mt-1 text-sm font-semibold text-red-600">{errors[name]}</p>
     ) : null;
 
   const fieldId = (key) => `${id}-${key}`;
@@ -47,7 +47,7 @@ export default function NewBuildingForm({
 
       <div>
         <label htmlFor={fieldId("name")} className="block text-sm font-semibold text-ink">
-          Building name
+          Building name <span className="text-red-500">*</span>
         </label>
         <input
           id={fieldId("name")}
@@ -55,14 +55,13 @@ export default function NewBuildingForm({
           onChange={setField("name")}
           className={fieldClass("name")}
           placeholder="e.g. Pleasantville Apartments"
-          required
         />
         <ErrorText name="name" />
       </div>
 
       <div>
         <label htmlFor={fieldId("street")} className="block text-sm font-semibold text-ink">
-          Street address
+          Street address <span className="text-red-500">*</span>
         </label>
         <input
           id={fieldId("street")}
@@ -76,7 +75,7 @@ export default function NewBuildingForm({
 
       <div>
         <label htmlFor={fieldId("cts_number")} className="block text-sm font-semibold text-ink">
-          CTS number
+          CTS number <span className="text-red-500">*</span>
         </label>
         <input
           id={fieldId("cts_number")}
@@ -84,14 +83,13 @@ export default function NewBuildingForm({
           onChange={setField("cts_number")}
           className={fieldClass("cts_number")}
           placeholder="e.g. 12345"
-          required
         />
         <ErrorText name="cts_number" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label htmlFor={fieldId("suburb")} className="block text-sm font-semibold text-ink">Suburb</label>
+          <label htmlFor={fieldId("suburb")} className="block text-sm font-semibold text-ink">Suburb <span className="text-slate-500 font-normal">(optional)</span></label>
           <input
             id={fieldId("suburb")}
             value={value.suburb}
@@ -102,7 +100,7 @@ export default function NewBuildingForm({
         </div>
 
         <div>
-          <label htmlFor={fieldId("state")} className="block text-sm font-semibold text-ink">State</label>
+          <label htmlFor={fieldId("state")} className="block text-sm font-semibold text-ink">State <span className="text-slate-500 font-normal">(optional)</span></label>
           <input
             id={fieldId("state")}
             value={value.state}
@@ -114,7 +112,7 @@ export default function NewBuildingForm({
 
         <div>
           <label htmlFor={fieldId("postcode")} className="block text-sm font-semibold text-ink">
-            Postcode
+            Postcode <span className="text-slate-500 font-normal">(optional)</span>
           </label>
           <input
             id={fieldId("postcode")}

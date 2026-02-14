@@ -24,21 +24,12 @@ function NewFundraiserForm() {
   // ✅ Form + field errors (banner + inline)
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({}); // e.g. { cts_number: "Already exists" }
+  const [validationErrors, setValidationErrors] = useState({}); // client-side required-field errors
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [goal, setGoal] = useState("");
   const [image, setImage] = useState("");
-
-  const canContinue =
-    title.trim() &&
-    description.trim() &&
-    Number(goal) > 0 &&
-    (selectedBuildingId && selectedBuildingId !== "__new__"
-      ? true
-      : newBuilding.name.trim() &&
-        newBuilding.cts_number.trim() &&
-        newBuilding.street.trim());
 
   // Helper: turn DRF error objects into { field: "msg" }
   const parseApiErrors = (data) => {
@@ -55,6 +46,7 @@ function NewFundraiserForm() {
   const resetErrors = () => {
     setFormError("");
     setFieldErrors({});
+    setValidationErrors({});
   };
 
   // Wrap onChange so we can clear field errors as user edits
@@ -71,6 +63,16 @@ function NewFundraiserForm() {
         });
       }
 
+      // Clear validation errors for fields being edited
+      setValidationErrors((v) => {
+        const copy = { ...v };
+        if (prev.name !== next.name) delete copy.name;
+        if (prev.cts_number !== next.cts_number) delete copy.cts_number;
+        if (prev.street !== next.street) delete copy.street;
+        if (Object.keys(copy).length === 0) return {};
+        return copy;
+      });
+
       // Also clear top banner if they're actively fixing the form
       if (formError) setFormError("");
 
@@ -81,6 +83,26 @@ function NewFundraiserForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     resetErrors();
+
+    // Client-side validation: required fundraiser fields
+    const errors = {};
+    if (!title.trim()) errors.title = "This field is required.";
+    if (!description.trim()) errors.description = "This field is required.";
+    if (!goal.trim() || Number(goal) <= 0) errors.goal = "Please enter a valid goal amount.";
+    if (!image.trim()) errors.image = "This field is required.";
+    if (!selectedBuildingId) {
+      errors.building = "Please select a building.";
+    } else if (selectedBuildingId === "__new__") {
+      if (!newBuilding.name.trim()) errors.name = "Building name is required.";
+      if (!newBuilding.cts_number.trim()) errors.cts_number = "CTS number is required.";
+      if (!newBuilding.street.trim()) errors.street = "Street is required.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      setFormError("Please fill in all required fields.");
+      return;
+    }
 
     const token = auth?.token || localStorage.getItem("token");
     const headers = {
@@ -222,7 +244,7 @@ function NewFundraiserForm() {
         {/* Title */}
         <div>
           <label className="block text-sm font-semibold text-ink">
-            Fundraiser title
+            Fundraiser title <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -230,17 +252,22 @@ function NewFundraiserForm() {
             onChange={(e) => {
               setTitle(e.target.value);
               if (formError) setFormError("");
+              if (validationErrors.title) setValidationErrors((v) => ({ ...v, title: "" }));
             }}
             placeholder="e.g. Fix the leaking roof"
-            className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm font-medium shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
-            required
+            className={`mt-1 w-full rounded-xl border px-4 py-3 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-blueBright/20 ${
+              validationErrors.title ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-blueDeep/20 focus:border-blueBright"
+            }`}
           />
+          {validationErrors.title && (
+            <p className="mt-1 text-sm font-semibold text-red-600">{validationErrors.title}</p>
+          )}
         </div>
 
         {/* Description */}
         <div>
           <label className="block text-sm font-semibold text-ink">
-            Description
+            Description <span className="text-red-500">*</span>
           </label>
           <textarea
             rows={4}
@@ -248,17 +275,22 @@ function NewFundraiserForm() {
             onChange={(e) => {
               setDescription(e.target.value);
               if (formError) setFormError("");
+              if (validationErrors.description) setValidationErrors((v) => ({ ...v, description: "" }));
             }}
             placeholder="What’s going on? Why does it matter?"
-            className="mt-1 w-full rounded-xl border border-blueDeep/20 px-4 py-3 text-sm font-medium shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
-            required
+            className={`mt-1 w-full rounded-xl border px-4 py-3 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-blueBright/20 ${
+              validationErrors.description ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-blueDeep/20 focus:border-blueBright"
+            }`}
           />
+          {validationErrors.description && (
+            <p className="mt-1 text-sm font-semibold text-red-600">{validationErrors.description}</p>
+          )}
         </div>
 
         {/* Goal */}
         <div>
           <label className="block text-sm font-medium text-slate-700">
-            Fundraising goal ($)
+            Fundraising goal ($) <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
@@ -268,17 +300,22 @@ function NewFundraiserForm() {
             onChange={(e) => {
               setGoal(e.target.value);
               if (formError) setFormError("");
+              if (validationErrors.goal) setValidationErrors((v) => ({ ...v, goal: "" }));
             }}
             placeholder="e.g. 2500"
-            className="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2 focus:border-pinky focus:ring-pinky"
-            required
+            className={`mt-1 block w-full rounded-xl border px-4 py-2 focus:outline-none focus:ring-2 ${
+              validationErrors.goal ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-slate-300 focus:border-pinky focus:ring-pinky"
+            }`}
           />
+          {validationErrors.goal && (
+            <p className="mt-1 text-sm font-semibold text-red-600">{validationErrors.goal}</p>
+          )}
         </div>
 
         {/* Image URL */}
         <div>
           <label className="block text-sm font-medium text-slate-700">
-            Image URL (optional)
+            Image URL <span className="text-red-500">*</span>
           </label>
 
           <input
@@ -287,12 +324,19 @@ function NewFundraiserForm() {
             onChange={(e) => {
               setImage(e.target.value);
               if (formError) setFormError("");
+              if (validationErrors.image) setValidationErrors((v) => ({ ...v, image: "" }));
             }}
             placeholder="https://example.com/photo.jpg"
-            className="mt-1 block w-full rounded-xl border border-slate-300 px-4 py-2 focus:border-pinky focus:ring-pinky"
+            className={`mt-1 block w-full rounded-xl border px-4 py-2 focus:outline-none focus:ring-2 ${
+              validationErrors.image ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-slate-300 focus:border-pinky focus:ring-pinky"
+            }`}
           />
 
-          {image && (
+          {validationErrors.image && (
+            <p className="mt-1 text-sm font-semibold text-red-600">{validationErrors.image}</p>
+          )}
+
+          {image && !validationErrors.image && (
             <p className="mt-2 break-all text-xs text-slate-600">
               Preview: {image}
             </p>
@@ -302,7 +346,7 @@ function NewFundraiserForm() {
         {/* Building selector */}
         <div>
           <label className="block text-sm font-semibold text-ink">
-            Which building is this for?
+            Which building is this for? <span className="text-red-500">*</span>
           </label>
 
           {isLoadingBuildings ? (
@@ -316,7 +360,9 @@ function NewFundraiserForm() {
                   setSelectedBuildingId(e.target.value);
                   resetErrors();
                 }}
-                className="w-full appearance-none rounded-xl border border-blueDeep/20 bg-white px-4 py-3 pr-10 text-sm font-semibold text-ink shadow-sm focus:border-blueBright focus:outline-none focus:ring-2 focus:ring-blueBright/20"
+                className={`w-full appearance-none rounded-xl border bg-white px-4 py-3 pr-10 text-sm font-semibold text-ink shadow-sm focus:outline-none focus:ring-2 ${
+                  validationErrors.building ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-blueDeep/20 focus:border-blueBright focus:ring-blueBright/20"
+                }`}
               >
                 <option value="">Select a building</option>
                 {buildings.map((building) => (
@@ -325,6 +371,10 @@ function NewFundraiserForm() {
                   </option>
                 ))}
               </select>
+
+              {validationErrors.building && (
+                <p className="mt-1 text-sm font-semibold text-red-600">{validationErrors.building}</p>
+              )}
 
               <button
                 type="button"
@@ -341,7 +391,7 @@ function NewFundraiserForm() {
                 <NewBuildingForm
                   value={newBuilding}
                   onChange={handleNewBuildingChange}
-                  errors={fieldErrors}
+                  errors={{ ...fieldErrors, ...validationErrors }}
                   onCancel={() => {
                     resetErrors();
                     setSelectedBuildingId("");
@@ -377,8 +427,7 @@ function NewFundraiserForm() {
         <div className="pt-2">
           <button
             type="submit"
-            disabled={!canContinue}
-            className="inline-flex rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex rounded-xl bg-pinky px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
           >
             Continue
           </button>
