@@ -14,7 +14,7 @@ function LoginPage() {
                 Welcome back ✨
               </p>
 
-              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-blueSky sm:text-5xl md:text-6xl">
+              <h1 className="mt-6 font-display text-4xl leading-tight tracking-tight text-blueSky sm:text-5xl md:text-6xl lg:text-7xl">
                 Log in to StrataBoost
               </h1>
 

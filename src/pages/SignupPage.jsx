@@ -12,8 +12,9 @@ function SignupPage() {
                 New here? ✨
               </p>
 
-              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-blueSky sm:text-5xl md:text-6xl">
-                Create your StrataBoost account
+              <h1 className="mt-6 font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                <span className="block text-blueSky">Create your</span>
+                <span className="-mt-3 block text-pinky sm:-mt-2">StrataBoost account</span>
               </h1>
 
               <p className="mt-5 text-base leading-relaxed text-white/90 sm:text-lg">

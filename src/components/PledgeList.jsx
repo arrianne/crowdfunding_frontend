@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DeleteConfirm from "./DeleteConfirm";
 import PledgeForm from "./PledgeForm";
 import { deletePledge } from "../api/delete-pledge";
 
@@ -17,41 +18,63 @@ function PledgeActions({
   onRefresh,
 }) {
   const [editing, setEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to remove this pledge? This cannot be undone.",
-    );
-    if (!confirmed) return;
+    setDeleteError(null);
+    setIsDeleting(true);
     try {
       await deletePledge(pledge.id, token);
+      setShowDeleteConfirm(false);
       onRefresh?.();
     } catch (err) {
       console.error(err);
-      alert(err?.message ?? "Failed to delete pledge");
+      setDeleteError(err?.message ?? "Failed to delete pledge");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   if (!isPledgeOwner(pledge, currentUserId)) return null;
 
   return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      <button
-        type="button"
-        onClick={() => setEditing((e) => !e)}
-        className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition"
-      >
-        {editing ? "Cancel edit" : "Edit"}
-      </button>
-      <button
-        type="button"
-        onClick={handleDelete}
-        className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200 hover:bg-red-50 transition"
-      >
-        Delete
-      </button>
+    <div className="mt-2 space-y-3">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setEditing((e) => !e)}
+          className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-blueDeep ring-1 ring-blueDeep/15 hover:bg-blueBright/10 transition"
+        >
+          {editing ? "Cancel edit" : "Edit"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setShowDeleteConfirm(true);
+            setDeleteError(null);
+          }}
+          className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200 hover:bg-red-50 transition"
+        >
+          Delete
+        </button>
+      </div>
+      <DeleteConfirm
+        variant="light"
+        isOpen={showDeleteConfirm}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setDeleteError(null);
+        }}
+        onConfirm={handleDelete}
+        title="Are you sure you want to remove this pledge?"
+        bullets={["This will permanently delete the pledge", "This action cannot be undone"]}
+        error={deleteError}
+        isDeleting={isDeleting}
+      />
       {editing && (
-        <div className="mt-2 w-full">
+        <div className="w-full">
           <PledgeForm
             fundraiserId={fundraiserId}
             initialPledge={pledge}

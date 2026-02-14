@@ -37,8 +37,9 @@ function StrataCommunitiesPage() {
           </div>
 
           {/* Title */}
-          <h1 className="mt-6 max-w-3xl text-3xl font-extrabold tracking-tight text-blueSky sm:text-4xl">
-            Strata Communities
+          <h1 className="mt-6 max-w-3xl font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            <span className="block text-blueSky">Strata</span>
+            <span className="-mt-3 block text-pinky sm:-mt-2">Communities</span>
           </h1>
 
           {/* Subheading */}

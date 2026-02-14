@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/use-auth";
 import useBuilding from "../hooks/use-building";
 import useBuildingFundraisers from "../hooks/use-building-fundraiser";
 import FundraiserCard from "../components/FundraiserCard";
+import DeleteConfirm from "../components/DeleteConfirm";
 import { deleteBuilding } from "../api/delete-building";
 import useIsOwner from "../hooks/use-is-owner";
 
@@ -14,6 +16,10 @@ function BuildingPage() {
   const { building, isLoadingBuilding, buildingError } = useBuilding(id);
 
   const { isOwner } = useIsOwner(building);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { fundraisers, isLoadingFundraisers, fundraisersError } =
     useBuildingFundraisers(id);
@@ -51,22 +57,17 @@ function BuildingPage() {
   if (!building) return null;
 
   const handleDeleteBuilding = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this building?\n\n" +
-        "• This will permanently delete the building\n" +
-        "• All associated fundraisers will also be removed\n" +
-        "• This action cannot be undone",
-    );
-
-    if (!confirmed) return;
-
+    setDeleteError(null);
+    setIsDeleting(true);
     try {
       const token = auth?.token || localStorage.getItem("token");
       await deleteBuilding(building.id, token);
       navigate("/");
     } catch (err) {
       console.error(err);
-      alert(err.message || "Something went wrong while deleting.");
+      setDeleteError(err.message || "Something went wrong while deleting.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -90,7 +91,7 @@ function BuildingPage() {
           </div>
 
           {/* Title */}
-          <h1 className="mt-6 max-w-3xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          <h1 className="mt-6 max-w-3xl font-display text-4xl leading-tight tracking-tight text-blueSky sm:text-5xl md:text-6xl lg:text-7xl">
             {building.name}
           </h1>
 
@@ -102,20 +103,42 @@ function BuildingPage() {
 
           {/* Owner actions */}
           {isOwner && (
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to={`/buildings/${building.id}/edit`}
-                className="inline-flex items-center rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
-              >
-                Edit building
-              </Link>
+            <div className="mt-6 space-y-4">
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to={`/buildings/${building.id}/edit`}
+                  className="inline-flex items-center rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
+                >
+                  Edit building
+                </Link>
 
-              <button
-                onClick={handleDeleteBuilding}
-                className="inline-flex items-center rounded-full bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 ring-1 ring-red-300/30 hover:bg-red-500/30 transition"
-              >
-                Delete
-              </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(true);
+                    setDeleteError(null);
+                  }}
+                  className="inline-flex items-center rounded-full bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 ring-1 ring-red-300/30 hover:bg-red-500/30 transition"
+                >
+                  Delete
+                </button>
+              </div>
+
+              <DeleteConfirm
+                isOpen={showDeleteConfirm}
+                onCancel={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
+                onConfirm={handleDeleteBuilding}
+                title="Are you sure you want to delete this building?"
+                bullets={[
+                  "This will permanently delete the building",
+                  "All associated fundraisers will also be removed",
+                  "This action cannot be undone",
+                ]}
+                error={deleteError}
+                isDeleting={isDeleting}
+              />
             </div>
           )}
         </div>

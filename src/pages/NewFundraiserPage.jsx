@@ -19,8 +19,9 @@ function NewFundraiserPage() {
               Start a fundraiser
             </p>
 
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-blueSky sm:text-4xl">
-              What are you raising support for?
+            <h1 className="mt-4 font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <span className="block text-blueSky">What are you raising</span>
+              <span className="-mt-3 block text-pinky sm:-mt-2">support for?</span>
             </h1>
 
             <p className="mt-4 text-base leading-relaxed text-white/90 sm:text-lg">

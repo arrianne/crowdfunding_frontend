@@ -71,10 +71,12 @@ function HomePage() {
               Neighbours helping neighbours ✨
             </p>
 
-            {/* Headline */}
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-blueSky sm:text-5xl md:text-6xl">
-              Raise funds,
-              <br /> not stress.
+            {/* Headline — two-line, two-colour, strong display font */}
+            <h1 className="mt-6 font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <span className="block text-blueSky">Raise funds,</span>
+              <span className="-mt-3 block text-pinky sm:-mt-2">
+                not stress.
+              </span>
             </h1>
 
             {/* Supporting copy */}

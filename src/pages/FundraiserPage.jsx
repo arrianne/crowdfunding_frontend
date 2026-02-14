@@ -6,6 +6,7 @@ import useFundraiser from "../hooks/use-fundraiser";
 import useBuilding from "../hooks/use-building";
 
 import { deleteFundraiser } from "../api/delete-fundraiser";
+import DeleteConfirm from "../components/DeleteConfirm";
 import PledgeForm from "../components/PledgeForm";
 import PledgesList from "../components/PledgeList";
 
@@ -27,6 +28,9 @@ function FundraiserPage() {
   const [refreshKey, setRefreshKey] = useState(0); // triggers refetch after pledge
   const [showPledgeForm, setShowPledgeForm] = useState(false);
   const [pledgeSuccess, setPledgeSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Track viewport size for confetti (responsive + fixed overlay)
   const [windowSize, setWindowSize] = useState({
@@ -170,13 +174,8 @@ function FundraiserPage() {
   // ACTIONS
   // ======================================================
   const handleDeleteFundraiser = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this fundraiser?\n\n" +
-        "• This will permanently delete the fundraiser\n" +
-        "• This action cannot be undone",
-    );
-    if (!confirmed) return;
-
+    setDeleteError(null);
+    setIsDeleting(true);
     try {
       const token = auth?.token || localStorage.getItem("token");
       await deleteFundraiser(fundraiser.id, token);
@@ -185,7 +184,9 @@ function FundraiserPage() {
       navigate(buildingId ? `/buildings/${buildingId}` : "/strata-communities");
     } catch (err) {
       console.error(err);
-      alert(err?.message || "Failed to delete fundraiser");
+      setDeleteError(err?.message || "Failed to delete fundraiser");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -231,7 +232,7 @@ function FundraiserPage() {
           </div>
 
           {/* Title */}
-          <h1 className="mt-6 max-w-3xl text-3xl font-extrabold tracking-tight text-blueSky sm:text-4xl">
+          <h1 className="mt-6 max-w-3xl font-display text-4xl leading-tight tracking-tight text-blueSky sm:text-5xl md:text-6xl lg:text-7xl">
             {title}
           </h1>
 
@@ -261,20 +262,41 @@ function FundraiserPage() {
 
           {/* Owner actions */}
           {isOwner && (
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to={`/fundraisers/${fundraiser.id}/edit`}
-                className="inline-flex items-center rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
-              >
-                Edit
-              </Link>
+            <div className="mt-6 space-y-4">
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to={`/fundraisers/${fundraiser.id}/edit`}
+                  className="inline-flex items-center rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/30 transition"
+                >
+                  Edit
+                </Link>
 
-              <button
-                onClick={handleDeleteFundraiser}
-                className="inline-flex items-center rounded-full bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 ring-1 ring-red-300/30 hover:bg-red-500/30 transition"
-              >
-                Delete
-              </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(true);
+                    setDeleteError(null);
+                  }}
+                  className="inline-flex items-center rounded-full bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 ring-1 ring-red-300/30 hover:bg-red-500/30 transition"
+                >
+                  Delete
+                </button>
+              </div>
+
+              <DeleteConfirm
+                isOpen={showDeleteConfirm}
+                onCancel={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
+                onConfirm={handleDeleteFundraiser}
+                title="Are you sure you want to delete this fundraiser?"
+                bullets={[
+                  "This will permanently delete the fundraiser",
+                  "This action cannot be undone",
+                ]}
+                error={deleteError}
+                isDeleting={isDeleting}
+              />
             </div>
           )}
         </div>

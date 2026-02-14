@@ -76,19 +76,43 @@ function UserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-white text-slate-900">
-      <div className="mx-auto max-w-6xl px-6 pt-12 pb-8 lg:pt-14 lg:pb-10">
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
-            Hello, {username} 👋
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
+      {/* PAGE HEADER (hero) */}
+      <section className="relative overflow-hidden bg-blueDeep">
+        <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 sm:pt-20 sm:pb-24">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/"
+              className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25 hover:bg-white/20 transition"
+            >
+              ← Back
+            </Link>
+            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 ring-1 ring-white/15">
+              Dashboard
+            </span>
+          </div>
+
+          <h1 className="mt-6 max-w-3xl font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            <span className="block text-blueSky">Hello,</span>
+            <span className="-mt-3 flex items-center text-pinky sm:-mt-2">
+            {username}
+            <img
+              src="/images/waving-hand.png"
+              alt=""
+              className="ml-5 h-[1em] w-[1em] shrink-0 animate-wave-shake sm:ml-6 md:ml-8"
+              aria-hidden
+            />
+          </span>
           </h1>
-          <p className="mt-1 text-sm text-blueDeep/80">
+
+          <p className="mt-4 max-w-2xl text-sm text-white/80">
             Your fundraisers and pledges in one place.
           </p>
-        </header>
+        </div>
+      </section>
 
-        {/* Dashboard grid: left (wider) + right (narrow) */}
+      {/* Dashboard grid: left (wider) + right (narrow) */}
+      <div className="mx-auto max-w-6xl px-6 pt-10 pb-8 lg:pt-12 lg:pb-10">
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
           {/* Left column */}
           <div className="space-y-6">

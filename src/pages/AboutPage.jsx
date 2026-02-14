@@ -14,8 +14,9 @@ function About() {
             </p>
 
             {/* Headline */}
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-blueSky sm:text-5xl md:text-6xl">
-              Getting things fixed — together.
+            <h1 className="mt-6 font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <span className="block text-blueSky">Getting things fixed —</span>
+              <span className="-mt-3 block text-pinky sm:-mt-2">together.</span>
             </h1>
 
             {/* Supporting copy */}

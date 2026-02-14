@@ -13,8 +13,9 @@ export default function NotFoundPage() {
               <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/25">
                 404 • Page not found
               </p>
-              <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-blueSky sm:text-4xl">
-                This page has slipped out the fire exit.
+              <h1 className="mt-5 font-display text-4xl leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                <span className="block text-blueSky">This page has slipped</span>
+                <span className="-mt-3 block text-pinky sm:-mt-2">out the fire exit.</span>
               </h1>
               <p className="mt-3 text-base leading-relaxed text-white/90">
                 We couldn’t find{" "}

@@ -7,4 +7,27 @@
   --color-blueBright: #2860b8;
   --color-blueSky: #9fdaf6;
   --color-ink: #0d0d0d;
+  --font-display: "Archivo Black", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* One-off wave shake for the dashboard hand (runs once on load) */
+@keyframes wave-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-14deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+}
+
+.animate-wave-shake {
+  transform-origin: left center;
+  animation: wave-shake 1.5s ease-in-out 1;
 }
