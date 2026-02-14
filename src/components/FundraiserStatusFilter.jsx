@@ -8,8 +8,6 @@ export default function FundraiserStatusFilter({
     { key: "all", label: "All" },
     { key: "open", label: "Open" },
     { key: "closed", label: "Closed" },
-    // Future:
-    // { key: "funded", label: "Funded" },
   ];
 
   return (

@@ -55,7 +55,33 @@ function StrataCommunitiesPage() {
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-20">
           {isLoadingBuildings ? (
-            <p className="text-sm text-blueDeep/70">Loading communities…</p>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-pinky/20"
+                >
+                  <div className="p-6 pb-0">
+                    {/* Skeleton: fundraiser count badge */}
+                    <div className="skeleton mb-4 h-9 w-28 rounded-xl" />
+                    {/* Skeleton: title */}
+                    <div className="skeleton h-6 w-3/4 rounded-md" />
+                    <div className="skeleton mt-2 h-4 max-w-[85%] rounded-md" style={{ width: "90%" }} />
+                    {/* Skeleton: address line */}
+                    <div className="skeleton mt-2 h-4 max-w-[75%] rounded-md" style={{ width: "80%" }} />
+                    {/* Skeleton: pill tags */}
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <div className="skeleton h-7 w-16 rounded-full" />
+                      <div className="skeleton h-7 w-20 rounded-full" />
+                    </div>
+                  </div>
+                  {/* Skeleton: footer strip */}
+                  <div className="mt-6 flex h-12 items-center justify-center rounded-b-3xl bg-pinky/30">
+                    <div className="skeleton h-4 w-24 rounded-md opacity-80" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : buildingsError ? (
             <p className="text-sm text-red-600">
               Couldn’t load communities. Please try again later.

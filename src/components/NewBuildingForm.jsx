@@ -1,11 +1,14 @@
+import { useId } from "react";
+
 export default function NewBuildingForm({
   value,
   onChange,
   onCancel,
   showCancel = true,
-  errors = {}, // ✅ add this
+  errors = {},
 }) {
-  // helper to update a single field
+  const id = useId();
+
   const setField = (key) => (e) =>
     onChange({ ...value, [key]: e.target.value });
 
@@ -21,6 +24,8 @@ export default function NewBuildingForm({
     errors?.[name] ? (
       <p className="mt-2 text-sm font-semibold text-red-600">{errors[name]}</p>
     ) : null;
+
+  const fieldId = (key) => `${id}-${key}`;
 
   return (
     <div className="rounded-xl bg-blueBright/5 p-4 space-y-4 ring-1 ring-blueDeep/10">
@@ -41,10 +46,11 @@ export default function NewBuildingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-ink">
+        <label htmlFor={fieldId("name")} className="block text-sm font-semibold text-ink">
           Building name
         </label>
         <input
+          id={fieldId("name")}
           value={value.name}
           onChange={setField("name")}
           className={fieldClass("name")}
@@ -55,10 +61,11 @@ export default function NewBuildingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-ink">
+        <label htmlFor={fieldId("street")} className="block text-sm font-semibold text-ink">
           Street address
         </label>
         <input
+          id={fieldId("street")}
           value={value.street}
           onChange={setField("street")}
           className={fieldClass("street")}
@@ -68,10 +75,11 @@ export default function NewBuildingForm({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-ink">
+        <label htmlFor={fieldId("cts_number")} className="block text-sm font-semibold text-ink">
           CTS number
         </label>
         <input
+          id={fieldId("cts_number")}
           value={value.cts_number}
           onChange={setField("cts_number")}
           className={fieldClass("cts_number")}
@@ -83,8 +91,9 @@ export default function NewBuildingForm({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="block text-sm font-semibold text-ink">Suburb</label>
+          <label htmlFor={fieldId("suburb")} className="block text-sm font-semibold text-ink">Suburb</label>
           <input
+            id={fieldId("suburb")}
             value={value.suburb}
             onChange={setField("suburb")}
             className={fieldClass("suburb")}
@@ -93,8 +102,9 @@ export default function NewBuildingForm({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-ink">State</label>
+          <label htmlFor={fieldId("state")} className="block text-sm font-semibold text-ink">State</label>
           <input
+            id={fieldId("state")}
             value={value.state}
             onChange={setField("state")}
             className={fieldClass("state")}
@@ -103,10 +113,11 @@ export default function NewBuildingForm({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-ink">
+          <label htmlFor={fieldId("postcode")} className="block text-sm font-semibold text-ink">
             Postcode
           </label>
           <input
+            id={fieldId("postcode")}
             value={value.postcode}
             onChange={setField("postcode")}
             className={fieldClass("postcode")}
