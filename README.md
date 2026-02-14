@@ -2,6 +2,9 @@
 
 A React single-page application for **Strata Boost**, a community crowdfunding platform for strata and body-corporate buildings. Neighbours can create fundraisers for repairs and community projects, and others can pledge money or skills to help.
 
+**Live app:** [https://strataboost.netlify.app](https://strataboost.netlify.app)  
+**Live API:** [https://crowdfunding-app-e10aea27326f.herokuapp.com](https://crowdfunding-app-e10aea27326f.herokuapp.com)
+
 This frontend talks to the Strata Boost Django REST API (the `crowdfunding_backend` project) for auth, fundraisers, buildings, and pledges.
 
 ## Screenshots
@@ -22,7 +25,12 @@ This frontend talks to the Strata Boost Django REST API (the `crowdfunding_backe
 | ![New Fundraiser Form](public/images/new-fundraiser-form.png) | Form for creating a new fundraiser. |
 | ![Edit/Delete (Owner)](public/images/edit-delete-owner-fundraiser.png) | Fundraiser detail view when logged in as the owner — Edit and Delete buttons are shown. |
 | ![No Edit/Delete (Non-owner)](public/images/no-edit-delete-nonowner.png) | Fundraiser detail view for non-owners — Edit and Delete buttons are hidden. |
-| ![App Screenshot](public/images/Screenshot%202026-02-14%20at%209.19.22%20am.png) | General app screenshot. |
+| ![404 Page](public/images/404-page.png) | Custom 404 page shown when a route or resource is not found. |
+| ![Confetti Fully Funded](public/images/confetti-canon-fully-funded.png) | Celebration confetti animation when a fundraiser reaches its goal. |
+| ![Delete Confirmation](public/images/delete-confirmation.png) | Confirmation modal before deleting a fundraiser. |
+| ![Pledge Form](public/images/pledge-form.png) | Form for pledging money or skills to a fundraiser. |
+| ![User Dashboard](public/images/user-dashboard.png) | User profile page with pledges and account information. |
+
 
 ## What it does
 
@@ -63,13 +71,17 @@ This frontend talks to the Strata Boost Django REST API (the `crowdfunding_backe
 npm install
 ```
 
-Create a `.env` in the project root with the backend API base URL:
+Create a `.env` in the project root with the backend API base URL. For local development:
 
 ```env
 VITE_API_URL=http://localhost:8000
 ```
 
-For a deployed backend, use that URL instead (e.g. `https://your-api.herokuapp.com`).
+To use the deployed backend instead:
+
+```env
+VITE_API_URL=https://crowdfunding-app-e10aea27326f.herokuapp.com
+```
 
 ```bash
 npm run dev

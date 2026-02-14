@@ -196,10 +196,7 @@ function FundraiserPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-white text-slate-900">
       {!isOpen && isFundedUI && (
-        <div
-          className="pointer-events-none fixed inset-0 z-50"
-          aria-hidden
-        >
+        <div className="pointer-events-none fixed inset-0 z-50" aria-hidden>
           <ReactConfetti
             width={windowSize.width}
             height={windowSize.height}
@@ -355,6 +352,7 @@ function FundraiserPage() {
                 fundraiserId={fundraiser.id}
                 isOpen={isOpen}
                 currentUserId={auth?.user_id ?? undefined}
+                currentUsername={auth?.username ?? undefined}
                 onRefresh={() => setRefreshKey((k) => k + 1)}
               />
             </div>

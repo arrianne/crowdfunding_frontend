@@ -96,6 +96,7 @@ function PledgesList({
   fundraiserId = null,
   isOpen = true,
   currentUserId = null,
+  currentUsername = null,
   onRefresh,
 }) {
   const token =
@@ -139,9 +140,11 @@ function PledgesList({
           ) : (
             <ul className="space-y-3">
               {moneyPledges.map((p) => {
+                const supporterId = p.supporter ?? p.supporter_id;
+                const isCurrentUser = currentUserId != null && supporterId != null && String(supporterId) === String(currentUserId);
                 const who = p.anonymous
                   ? "Anonymous"
-                  : `Supporter #${p.supporter ?? p.supporter_id ?? "?"}`;
+                  : (p.supporter_username ?? (isCurrentUser && currentUsername ? currentUsername : null) ?? `Supporter #${supporterId ?? "?"}`);
 
                 return (
                   <li
@@ -204,9 +207,11 @@ function PledgesList({
           ) : (
             <ul className="space-y-3">
               {skillPledges.map((p) => {
+                const supporterId = p.supporter ?? p.supporter_id;
+                const isCurrentUser = currentUserId != null && supporterId != null && String(supporterId) === String(currentUserId);
                 const who = p.anonymous
                   ? "Anonymous"
-                  : `Supporter #${p.supporter ?? p.supporter_id ?? "?"}`;
+                  : (p.supporter_username ?? (isCurrentUser && currentUsername ? currentUsername : null) ?? `Supporter #${supporterId ?? "?"}`);
 
                 return (
                   <li
