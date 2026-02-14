@@ -212,7 +212,7 @@ function NewFundraiserForm() {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-        {/* ✅ Nice banner error */}
+        {/* Nice banner error */}
         {formError && (
           <div className="rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700 ring-1 ring-red-200">
             {formError}

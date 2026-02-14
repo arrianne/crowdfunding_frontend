@@ -33,7 +33,7 @@ function StatsCarousel({ totalFundraisers, totalPledges, fundedCount }) {
       aria-label="Platform statistics"
     >
       <div className="relative mx-auto max-w-4xl px-6 flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-12">
-        {/* Left: logo + copy — equal half, content centred, text left */}
+        {}
         <div className="flex flex-col items-center lg:w-1/2 lg:flex-shrink-0">
           <p className="mt-5 w-full max-w-md border-b-2 border-blueDeep pb-3 text-left text-lg font-semibold text-white sm:max-w-lg sm:text-xl">
             Communal living is better when neighbours can come together.
@@ -45,7 +45,7 @@ function StatsCarousel({ totalFundraisers, totalPledges, fundedCount }) {
           </p>
         </div>
 
-        {/* Right: carousel — equal half, centred block */}
+        {}
         <div className="flex flex-col items-center lg:w-1/2 lg:flex-shrink-0 lg:justify-center">
           <div className="relative min-h-[140px] w-full max-w-sm sm:min-h-[160px]">
             {slides.map((slide, index) => (
